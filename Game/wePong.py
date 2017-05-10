@@ -21,6 +21,10 @@ RED = [255, 0, 0]
 BLUE = [0, 0, 255]
 GREEN = [0, 255, 0]
 
+STARTSPEED = 8
+PADDLEUPPERPOSITION = 4
+PADDLELOWERPOSITION =WINDOWHEIGHT/4 * 3 - 4
+
 
 # Arena zeichnen
 def drawArena():
@@ -48,10 +52,15 @@ def drawBall(ballX,ballY):
 
 # Ball bewegen
 def moveBall(ball,ballDirX, ballDirY):
-    
     ball.x += ballDirX
     ball.y += ballDirY
     return ball
+
+# Überprüfen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung verändert
+def checkEdgeCollision(ball, ballDirY):
+    if ball.top <= (LINETHICKNESS*2) or ball.bottom >= (WINDOWHEIGHT - LINETHICKNESS*2):
+        ballDirY = ballDirY * -1
+    return ballDirY
 
 
 
@@ -78,8 +87,8 @@ def main():
     ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
 
     # Ball Flugrichtung
-    ballDirX = -1 ## -1 = links 1 = rechts
-    ballDirY = -1 ## -1 = hoch 1 = runter
+    ballDirX = -STARTSPEED # -1 = links 1 = rechts
+    ballDirY = -STARTSPEED # -1 = hoch 1 = runter
 
     # Startposition der Schläger
     playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
@@ -101,12 +110,29 @@ def main():
                 pygame.quit()
                 sys.exit()
 
+        pressed = pygame.key.get_pressed()
+
+        # Steuerung linker Schläger
+        if pressed[pygame.K_w]:
+            paddle1.y = PADDLEUPPERPOSITION
+        if pressed[pygame.K_s]:
+            paddle1.y = PADDLELOWERPOSITION
+
+        #Steuerung rechter Schläger
+        if pressed[pygame.K_UP]:
+            paddle2.y = PADDLEUPPERPOSITION
+        if pressed[pygame.K_DOWN]:
+            paddle2.y = PADDLELOWERPOSITION
+
+
         drawArena()
         drawPaddle(paddle1)
         drawPaddle(paddle2)
         drawBall(ball.x,ball.y)
 
         ball = moveBall(ball, ballDirX, ballDirY)
+        ballDirY = checkEdgeCollision(ball, ballDirY)
+
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

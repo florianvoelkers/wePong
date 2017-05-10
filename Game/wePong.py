@@ -18,18 +18,19 @@ LINETHICKNESS = 4
 # Farben vor definieren
 WHITE = [255, 255, 255]
 RED = [255, 0, 0]
-BLUE = [0,0,255]
-GREEN = [0,255,0]
+BLUE = [0, 0, 255]
+GREEN = [0, 255, 0]
 
 
 # Arena zeichnen
 def drawArena():
-    SCREEN.fill((0,0,0))
-    net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4,0,8,WINDOWHEIGHT))
+
+    SCREEN.fill(BLUE)
+    net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
 
     # Rand oben und unten
-    uppeREDge = pygame.draw.rect(SCREEN,GREEN,(0,WINDOWHEIGHT-LINETHICKNESS,WINDOWWIDTH,LINETHICKNESS))
-    loweREDge = pygame.draw.rect(SCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
+    upperEdge = pygame.draw.rect(SCREEN, GREEN, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
+    lowerEdge = pygame.draw.rect(SCREEN, GREEN, (0, 0, WINDOWWIDTH, LINETHICKNESS))
 
 # Schläger zeichnen
 def drawPaddle(paddle):
@@ -40,19 +41,25 @@ def drawPaddle(paddle):
         paddle.top = LINETHICKNESS
 
     pygame.draw.rect(SCREEN, WHITE, paddle)
-  
+
 # Ball zeichnen
 def drawBall(ballX,ballY):
     pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
 
+# Ball bewegen
+def moveBall(ball,ballDirX, ballDirY):
+    
+    ball.x += ballDirX
+    ball.y += ballDirY
+    return ball
 
 
 
 def main():
-    pygame.init()  
+    pygame.init()
 
     global SCREEN
-
+    # Display Objekt erstellen auf dem dann alles dargestellt wird
     SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT), pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
@@ -63,12 +70,16 @@ def main():
     # Netz in der Mitte
     net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4,0,8,WINDOWHEIGHT))
     # Rand oben und unten
-    uppeREDge = pygame.draw.rect(SCREEN,GREEN,(0,WINDOWHEIGHT-LINETHICKNESS,WINDOWWIDTH,LINETHICKNESS))
-    loweREDge = pygame.draw.rect(SCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
+    upperEdge = pygame.draw.rect(SCREEN,GREEN,(0,WINDOWHEIGHT-LINETHICKNESS,WINDOWWIDTH,LINETHICKNESS))
+    lowerEdge = pygame.draw.rect(SCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
 
     # Ball Startposition
     ballX = WINDOWWIDTH/2 - LINETHICKNESS/2
     ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
+
+    # Ball Flugrichtung
+    ballDirX = -1 ## -1 = links 1 = rechts
+    ballDirY = -1 ## -1 = hoch 1 = runter
 
     # Startposition der Schläger
     playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
@@ -77,6 +88,7 @@ def main():
     # Erstellen der Schläger
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET , playerTwoPosition, LINETHICKNESS*3,PADDLESIZE)
+    ball = pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
     
     drawArena()
     drawPaddle(paddle1)
@@ -92,7 +104,9 @@ def main():
         drawArena()
         drawPaddle(paddle1)
         drawPaddle(paddle2)
-        drawBall(ballX,ballY)
+        drawBall(ball.x,ball.y)
+
+        ball = moveBall(ball, ballDirX, ballDirY)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

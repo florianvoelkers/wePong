@@ -5,7 +5,7 @@ from pygame.locals import *
 
 # Globale Variablen
 # FPS = Spielgeschwindigkeit
-FPS = 60
+FPS = 200
 # Fenster breite und höhe
 WINDOWWIDTH = 1920
 WINDOWHEIGHT = 1080
@@ -21,9 +21,9 @@ RED = [255, 0, 0]
 BLUE = [0, 0, 255]
 GREEN = [0, 255, 0]
 
-STARTSPEED = 8
+STARTSPEED = 1
 PADDLEUPPERPOSITION = 4
-PADDLELOWERPOSITION =WINDOWHEIGHT/4 * 3 - 4
+PADDLELOWERPOSITION = WINDOWHEIGHT/4 * 3 - 4
 
 
 # Arena zeichnen
@@ -58,9 +58,17 @@ def moveBall(ball,ballDirX, ballDirY):
 
 # Überprüfen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung verändert
 def checkEdgeCollision(ball, ballDirY):
-    if ball.top <= (LINETHICKNESS*2) or ball.bottom >= (WINDOWHEIGHT - LINETHICKNESS*2):
+    if ball.top <= (LINETHICKNESS*4) or ball.bottom >= (WINDOWHEIGHT+LINETHICKNESS*4):
         ballDirY = ballDirY * -1
     return ballDirY
+
+# Überprüft ob der Ball mit einem Schläger kollidiertm wenn ja dann wird die Richtung  der Flugbahn verändert
+def checkHitBall(ball, paddle1, paddle2, ballDirX):
+    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 == ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
+        return -1
+    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 == ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
+        return -1
+    else: return 1
 
 
 
@@ -132,6 +140,7 @@ def main():
 
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirY = checkEdgeCollision(ball, ballDirY)
+        ballDirX = ballDirX * checkHitBall(ball, paddle1, paddle2, ballDirX)
 
 
         pygame.display.update()

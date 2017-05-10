@@ -38,12 +38,6 @@ def drawArena():
 
 # Schläger zeichnen
 def drawPaddle(paddle):
-    #Hält den Schläger auf aus dem Screen zu verschwinden
-    if paddle.bottom > WINDOWHEIGHT - LINETHICKNESS:
-        paddle.bottom = WINDOWHEIGHT - LINETHICKNESS
-    elif paddle.top < LINETHICKNESS:
-        paddle.top = LINETHICKNESS
-
     pygame.draw.rect(SCREEN, WHITE, paddle)
 
 # Ball zeichnen

@@ -1,5 +1,6 @@
 import pygame, sys
 from pygame.locals import *
+import random
 
 # zum ausführen in python "exec(open("C:/Users/Niko/Documents/wePong/Game/wePong.py").read())"  eingeben
 
@@ -12,7 +13,7 @@ WINDOWHEIGHT = 1080
 
 # Schlägergröße
 PADDLESIZE = WINDOWHEIGHT / 2
-PADDLEOFFSET = 20
+PADDLEOFFSET = - 40
 LINETHICKNESS = 4
 
 # Farben vor definieren
@@ -64,17 +65,65 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
         return -1
     else: return 1
 
+# Überprüft ob ein Punkt erziehlt wurde und gibt den neuen Score zurück 
+def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
+    def resetBall (score):
+        ball.x = WINDOWWIDTH/2 - LINETHICKNESS/2
+        ball.y = WINDOWHEIGHT/2 - LINETHICKNESS/2
+        ballDirY = random.sample([-1, 1],k=1)
+        ballDirX = random.sample([-1, 1],k=1)
+        return (ball,ballDirX[0],ballDirY[0])
+
+    if player:
+        # Überprüft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
+        if ball.right == WINDOWWIDTH - PADDLEOFFSET + LINETHICKNESS*5: 
+            score += 1
+            ball,ballDirX,ballDirY =  resetBall(score)
+            return score,ball,ballDirX,ballDirY
+        # Wenn nichts passiert ist
+        else: return (score,ball,ballDirX,ballDirY)
+    else:
+        # Überprüft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
+        if ball.left == PADDLEOFFSET - LINETHICKNESS*5: 
+            score += 1
+            ball,ballDirX,ballDirY =  resetBall(score)
+            return score,ball,ballDirX,ballDirY
+        # Wenn nichts passiert ist
+        else: return (score,ball,ballDirX,ballDirY)
+
+# Anzeige des Spieler Scores
+def displayScore(player, score):
+    if player: 
+        postion = WINDOWWIDTH - 150 
+    else:
+        postion = 150 
+
+    resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
+    resultRect = resultSurf.get_rect()
+    resultRect.topleft = (postion, 25)
+    SCREEN.blit(resultSurf, resultRect)
+    
+    
 
 def main():
     pygame.init()
 
     global SCREEN
+
+    # Einstellungen der Schriftart
+    global BASICFONT, BASICFONTSIZE
+    BASICFONTSIZE = 20
+    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT), pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
     FPSCLOCK = pygame.time.Clock()
+
+    score1 = 0
+    score2 = 0
 
     # Spielfläche in einer Farbe
     SCREEN.fill(BLUE)
@@ -135,6 +184,12 @@ def main():
         ball = moveBall(ball, ballDirX, ballDirY)
         ballDirY = checkEdgeCollision(ball, ballDirY)
         ballDirX = ballDirX * checkHitBall(ball, paddle1, paddle2, ballDirX)
+        score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
+        score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)
+
+
+        displayScore(True,score1)
+        displayScore(False,score2)
 
 
         pygame.display.update()

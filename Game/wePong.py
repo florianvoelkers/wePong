@@ -4,9 +4,11 @@ import random
 
 # zum ausführen in python "exec(open("C:/Users/Niko/Documents/wePong/Game/wePong.py").read())"  eingeben
 
-# Globale Variablen
-# FPS = Spielgeschwindigkeit
-FPS = 200
+
+# Spielgeschwindigkeit
+FPS = 40
+INCREASESPEED = 6
+
 # Fenster breite und höhe
 WINDOWWIDTH = 1920
 WINDOWHEIGHT = 1080
@@ -47,8 +49,8 @@ def drawBall(ballX,ballY):
 
 # Ball bewegen
 def moveBall(ball,ballDirX, ballDirY):
-    ball.x += ballDirX
-    ball.y += ballDirY
+    ball.x += (ballDirX * INCREASESPEED)
+    ball.y += (ballDirY * INCREASESPEED)
     return ball
 
 # Überprüfen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung verändert
@@ -59,9 +61,9 @@ def checkEdgeCollision(ball, ballDirY):
 
 # Überprüft ob der Ball mit einem Schläger kollidiertm wenn ja dann wird die Richtung  der Flugbahn verändert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
-    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 == ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
+    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
         return -1
-    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 == ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
+    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
         return -1
     else: return 1
 
@@ -77,7 +79,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
     if player:
         # Überprüft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
-        if ball.right == WINDOWWIDTH - PADDLEOFFSET + LINETHICKNESS*5: 
+        if ball.right >= WINDOWWIDTH - PADDLEOFFSET + LINETHICKNESS*5: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
             return score,ball,ballDirX,ballDirY
@@ -85,7 +87,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         else: return (score,ball,ballDirX,ballDirY)
     else:
         # Überprüft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
-        if ball.left == PADDLEOFFSET - LINETHICKNESS*5: 
+        if ball.left <= PADDLEOFFSET - LINETHICKNESS*5: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
             return score,ball,ballDirX,ballDirY

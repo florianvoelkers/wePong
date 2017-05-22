@@ -16,6 +16,9 @@ import android.widget.ImageView;
 public class CustomView extends View {
 
     private Rect joinGameButton;
+    private Rect instructionsButton;
+    private Rect setNameButton;
+    private Rect exitButton;
 
     public CustomView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,13 +42,33 @@ public class CustomView extends View {
         canvas.drawLine(width - 5, 0, width - 5, height, paint);
         canvas.drawLine(0, centerY - 5,width, centerY - 5, paint);
 
+        paint.setTextSize(172);
+        paint.setTextAlign(Paint.Align.CENTER);
+        canvas.drawText("wePong", centerX, centerY * 0.42f, paint);
+
         Bitmap title = BitmapFactory.decodeResource(getResources(), R.drawable.title);
         canvas.drawBitmap(title, centerX - title.getWidth() * 0.5f, height * 0.25f - title.getHeight() * 0.5f, paint);
 
         paint.setStyle(Paint.Style.STROKE);
-        joinGameButton = new Rect(160, centerY + 120, width - 160, centerY + 280);
+
+        joinGameButton = new Rect(160, centerY + 80, width - 160, centerY + 220);
         canvas.drawRect(joinGameButton, paint);
 
+        instructionsButton = new Rect(160, centerY + 260, width - 160, centerY + 400);
+        canvas.drawRect(instructionsButton, paint);
+
+        setNameButton = new Rect(160, centerY + 440, width - 160, centerY + 580);
+        canvas.drawRect(setNameButton, paint);
+
+        exitButton = new Rect(160, centerY + 620, width - 160, centerY + 760);
+        canvas.drawRect(exitButton, paint);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(72);
+        canvas.drawText("Join Game", centerX, joinGameButton.centerY() + 16, paint);
+        canvas.drawText("Instructions", centerX, instructionsButton.centerY() + 16, paint);
+        canvas.drawText("Set Name", centerX, setNameButton.centerY() + 16, paint);
+        canvas.drawText("Exit", centerX, exitButton.centerY() + 16, paint);
     }
 
     @Override
@@ -54,7 +77,16 @@ public class CustomView extends View {
         int y = (int) event.getY();
 
         if (joinGameButton.contains(x, y)){
-            
+
+        }
+        else if (instructionsButton.contains(x, y)){
+
+        }
+        else if (setNameButton.contains(x, y)){
+
+        }
+        else if (exitButton.contains(x, y)){
+            System.exit(0);
         }
 
         return super.onTouchEvent(event);

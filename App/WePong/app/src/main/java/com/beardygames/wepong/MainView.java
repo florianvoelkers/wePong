@@ -1,6 +1,7 @@
 package com.beardygames.wepong;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,14 +14,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-public class CustomView extends View {
+public class MainView extends View {
 
     private Rect joinGameButton;
     private Rect instructionsButton;
     private Rect setNameButton;
     private Rect exitButton;
 
-    public CustomView(Context context, AttributeSet attrs) {
+    public MainView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -77,7 +78,8 @@ public class CustomView extends View {
         int y = (int) event.getY();
 
         if (joinGameButton.contains(x, y)){
-
+            Intent intent = new Intent(getContext(), GameActivity.class);
+            getContext().startActivity(intent);
         }
         else if (instructionsButton.contains(x, y)){
 

@@ -9,7 +9,7 @@
 
     <view
         android:id="@+id/customView"
-        class="com.beardygames.wepong.CustomView"
+        class="com.beardygames.wepong.MainView"
         id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -6,7 +6,7 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    private CustomView view;
+    private MainView view;
 
     private void hideBars(){
         View decorView = getWindow().getDecorView();
@@ -23,15 +23,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        hideBars();
+        //hideBars();
 
-        view = (CustomView)findViewById(R.id.customView);
+        view = (MainView)findViewById(R.id.customView);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        hideBars();
+        //hideBars();
     }
 
 }

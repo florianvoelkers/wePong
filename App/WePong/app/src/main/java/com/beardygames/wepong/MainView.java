@@ -82,7 +82,8 @@ public class MainView extends View {
             getContext().startActivity(intent);
         }
         else if (instructionsButton.contains(x, y)){
-
+            Intent intent = new Intent(getContext(), InstructionsActivity.class);
+            getContext().startActivity(intent);
         }
         else if (setNameButton.contains(x, y)){
 

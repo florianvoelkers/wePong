@@ -17,6 +17,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
     private double azimuth;
     private float [] accel;
+    private boolean wifiEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    public void setWifiEnabled(boolean isEnabled){
+        wifiEnabled = isEnabled;
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR) {
@@ -50,17 +55,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
         }
         else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
-            // alpha is calculated as t / (t + dT)
-            // with t, the low-pass filter's time-constant
-            // and dT, the event delivery rate
-
-            /*final float alpha = 0.8f;
-
-            float [] gravity = new float[3];
-            gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-            gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-            gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];*/
-
             accel[0] = event.values[0];// - gravity[0];
             accel[1] = event.values[1];// - gravity[1];
             accel[2] = event.values[2];// - gravity[2];

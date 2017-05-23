@@ -2,18 +2,15 @@ import pygame, sys
 from pygame.locals import *
 import random
 
-# zum ausführen in python "exec(open("C:/Users/Niko/Documents/wePong/Game/wePong.py").read())"  eingeben
-
-
 # Spielgeschwindigkeit
 FPS = 40
 INCREASESPEED = 6
 
-# Fenster breite und höhe
-WINDOWWIDTH = 1920
-WINDOWHEIGHT = 1080
+# Fenster breite und hoehe
+WINDOWWIDTH = 1280
+WINDOWHEIGHT = 720
 
-# Schlägergröße
+# Schlaegergroesse
 PADDLESIZE = WINDOWHEIGHT / 2
 PADDLEOFFSET = - 40
 LINETHICKNESS = 4
@@ -39,7 +36,7 @@ def drawArena():
     upperEdge = pygame.draw.rect(SCREEN, GREEN, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
     lowerEdge = pygame.draw.rect(SCREEN, GREEN, (0, 0, WINDOWWIDTH, LINETHICKNESS))
 
-# Schläger zeichnen
+# Schlaeger zeichnen
 def drawPaddle(paddle):
     pygame.draw.rect(SCREEN, WHITE, paddle)
 
@@ -53,13 +50,13 @@ def moveBall(ball,ballDirX, ballDirY):
     ball.y += (ballDirY * INCREASESPEED)
     return ball
 
-# Überprüfen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung verändert
+# Ueberpruefen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung veraendert
 def checkEdgeCollision(ball, ballDirY):
     if ball.top <= (LINETHICKNESS*4) or ball.bottom >= (WINDOWHEIGHT+LINETHICKNESS*4):
         ballDirY = ballDirY * -1
     return ballDirY
 
-# Überprüft ob der Ball mit einem Schläger kollidiertm wenn ja dann wird die Richtung  der Flugbahn verändert
+# Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
         return -1
@@ -67,7 +64,7 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
         return -1
     else: return 1
 
-# Überprüft ob ein Punkt erziehlt wurde und gibt den neuen Score zurück 
+# Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
 def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
     def resetBall (score):
@@ -78,7 +75,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         return (ball,ballDirX[0],ballDirY[0])
 
     if player:
-        # Überprüft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
+        # Ueberprueft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
         if ball.right >= WINDOWWIDTH - PADDLEOFFSET + LINETHICKNESS*5: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
@@ -86,7 +83,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         # Wenn nichts passiert ist
         else: return (score,ball,ballDirX,ballDirY)
     else:
-        # Überprüft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
+        # UeberprUeft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
         if ball.left <= PADDLEOFFSET - LINETHICKNESS*5: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
@@ -119,7 +116,7 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT), pygame.FULLSCREEN)    
+    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
     FPSCLOCK = pygame.time.Clock()
@@ -127,7 +124,7 @@ def main():
     score1 = 0
     score2 = 0
 
-    # Spielfläche in einer Farbe
+    # Spielflaeche in einer Farbe
     SCREEN.fill(BLUE)
     # Netz in der Mitte
     net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4,0,8,WINDOWHEIGHT))
@@ -143,11 +140,11 @@ def main():
     ballDirX = -STARTSPEED # -1 = links 1 = rechts
     ballDirY = -STARTSPEED # -1 = hoch 1 = runter
 
-    # Startposition der Schläger
+    # Startposition der Schlaeger
     playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
     playerTwoPosition = (WINDOWHEIGHT - PADDLESIZE) /2
 
-    # Erstellen der Schläger
+    # Erstellen der Schlaeger
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET , playerTwoPosition, LINETHICKNESS*3,PADDLESIZE)
     ball = pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
@@ -163,15 +160,21 @@ def main():
                 pygame.quit()
                 sys.exit()
 
+
+                
         pressed = pygame.key.get_pressed()
 
-        # Steuerung linker Schläger
+        if pressed[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+
+        # Steuerung linker Schlaeger
         if pressed[pygame.K_w]:
             paddle1.y = PADDLEUPPERPOSITION
         if pressed[pygame.K_s]:
             paddle1.y = PADDLELOWERPOSITION
 
-        #Steuerung rechter Schläger
+        #Steuerung rechter Schlaeger
         if pressed[pygame.K_UP]:
             paddle2.y = PADDLEUPPERPOSITION
         if pressed[pygame.K_DOWN]:

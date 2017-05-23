@@ -71,7 +71,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             //Azimuth darstellen
-            roll = orientationAngles[1] * 360 / (2 * Math.PI);
+            roll = orientationAngles[2] * 360 / (2 * Math.PI);
         }
         else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
             accel[0] = event.values[0];
@@ -90,8 +90,8 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
         registerReceiver(mReceiver, mIntentFilter);
     }
 
@@ -99,5 +99,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+        unregisterReceiver(mReceiver);
     }
 }

@@ -1,21 +1,30 @@
 package com.beardygames.wepong;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
 
     private GameView view;
+
     private SensorManager mSensorManager;
     private Sensor accelerometer;
     private Sensor rotationSensor;
 
-    private double azimuth;
+    private WifiP2pManager mManager;
+    private WifiP2pManager.Channel mChannel;
+    private BroadcastReceiver mReceiver;
+    private IntentFilter mIntentFilter;
+
+    private double roll;
     private float [] accel;
     private boolean wifiEnabled;
 
@@ -30,7 +39,17 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
 
-        azimuth = 0;
+        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+        roll = 0;
         accel = new float[3];
         for (int i = 0; i < accel.length; i++){
             accel[i] = 0;
@@ -52,15 +71,15 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             //Azimuth darstellen
-            azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
+            roll = orientationAngles[1] * 360 / (2 * Math.PI);
         }
         else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
-            accel[0] = event.values[0];// - gravity[0];
-            accel[1] = event.values[1];// - gravity[1];
-            accel[2] = event.values[2];// - gravity[2];
+            accel[0] = event.values[0];
+            accel[1] = event.values[1];
+            accel[2] = event.values[2];
         }
 
-        view.drawCanvas(azimuth, accel);
+        view.drawCanvas(roll, accel);
     }
 
     @Override
@@ -73,6 +92,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
         mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        registerReceiver(mReceiver, mIntentFilter);
     }
 
     @Override

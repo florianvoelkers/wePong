@@ -43,7 +43,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTextAlign(Paint.Align.CENTER);
 
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-        canvas.drawText("Angle: " + angle, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.25f, paint);
+        canvas.drawText("Roll-Angle: " + angle, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.25f, paint);
         canvas.drawText("Acceleration: " + accel[0], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f - 64, paint);
         canvas.drawText("" + accel[1], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f, paint);
         canvas.drawText("" + accel[2], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f + 64, paint);

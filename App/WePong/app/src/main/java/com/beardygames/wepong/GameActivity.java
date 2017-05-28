@@ -8,13 +8,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import java.io.BufferedWriter;
+/*import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.UnknownHostException;*/
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -24,10 +24,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometer;
     private Sensor rotationSensor;
 
-    private Socket socket;
+    //private Socket socket;
 
-    private static final int SERVERPORT = 5000;
-    private static final String SERVER_IP = "192.168.0.1";
+    //private static final int SERVERPORT = 5000;
+    //private static final String SERVER_IP = "192.168.0.1";
 
     private double roll;
     private float [] accel;
@@ -49,10 +49,10 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             accel[i] = 0;
         }
 
-        new Thread(new ClientThread()).start();
+        //new Thread(new ClientThread()).start();
     }
 
-    public void onClick(GameView view){
+    /*public void onClick(GameView view){
         System.out.println("click");
         try {
             String str = "hans wurst";
@@ -69,7 +69,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -111,7 +111,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.unregisterListener(this);
     }
 
-    class ClientThread implements Runnable {
+    /*class ClientThread implements Runnable {
 
         @Override
         public void run() {
@@ -129,6 +129,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
         }
 
-    }
+    }*/
 
 }

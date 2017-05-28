@@ -11,6 +11,8 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager.Channel mChannel;
     private GameActivity mActivity;
 
+    private WifiP2pManager.PeerListListener myPeerListListener;
+
     public WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel,
                                        GameActivity activity) {
         super();
@@ -25,20 +27,22 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
-            int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-            if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                // Wifi P2P is enabled
-                mActivity.setWifiEnabled(true);
-            } else {
-                // Wi-Fi P2P is not enabled
-                mActivity.setWifiEnabled(false);
-            }
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // Call WifiP2pManager.requestPeers() to get a list of current peers
+            // request available peers from the wifi p2p manager. This is an
+            // asynchronous call and the calling activity is notified with a
+            // callback on PeerListListener.onPeersAvailable()
+            System.out.println("get list of peers");
+            if (mManager != null) {
+                mManager.requestPeers(mChannel, myPeerListListener);
+            }
+
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Respond to new connection or disconnections
+            System.out.println("respond to new connection");
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
+            System.out.println("respond to device's wifi changing");
         }
     }
 }

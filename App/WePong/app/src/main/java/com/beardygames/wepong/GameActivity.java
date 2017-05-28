@@ -1,15 +1,20 @@
 package com.beardygames.wepong;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -19,14 +24,13 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometer;
     private Sensor rotationSensor;
 
-    private WifiP2pManager mManager;
-    private WifiP2pManager.Channel mChannel;
-    private BroadcastReceiver mReceiver;
-    private IntentFilter mIntentFilter;
+    private Socket socket;
+
+    private static final int SERVERPORT = 5000;
+    private static final String SERVER_IP = "192.168.0.1";
 
     private double roll;
     private float [] accel;
-    private boolean wifiEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,25 +43,32 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
 
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this);
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
         roll = 0;
         accel = new float[3];
         for (int i = 0; i < accel.length; i++){
             accel[i] = 0;
         }
+
+        new Thread(new ClientThread()).start();
     }
 
-    public void setWifiEnabled(boolean isEnabled){
-        wifiEnabled = isEnabled;
+    public void onClick(GameView view){
+        System.out.println("click");
+        try {
+            String str = "hans wurst";
+            PrintWriter out = new PrintWriter(new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream())),
+                    true);
+            out.write(str);
+            out.flush();
+            out.close();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -92,13 +103,32 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
         mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
-        registerReceiver(mReceiver, mIntentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
-        unregisterReceiver(mReceiver);
     }
+
+    class ClientThread implements Runnable {
+
+        @Override
+        public void run() {
+
+            try {
+                InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
+
+                socket = new Socket(serverAddr, SERVERPORT);
+
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+        }
+
+    }
+
 }

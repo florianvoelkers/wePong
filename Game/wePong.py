@@ -1,6 +1,9 @@
 import pygame, sys
 from pygame.locals import *
 import random
+import socket
+from threading import Thread
+
 
 # Spielgeschwindigkeit
 FPS = 40
@@ -23,7 +26,10 @@ GREEN = [0, 255, 0]
 
 STARTSPEED = 1
 PADDLEUPPERPOSITION = 4
-PADDLELOWERPOSITION = WINDOWHEIGHT/4 * 3 - 4
+PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 4
+
+LEFTPADDLEUP = False
+RIGHTPADDLEUP = False
 
 
 # Arena zeichnen
@@ -102,8 +108,27 @@ def displayScore(player, score):
     resultRect = resultSurf.get_rect()
     resultRect.topleft = (postion, 25)
     SCREEN.blit(resultSurf, resultRect)
-    
-    
+
+# Thread um die gesendeten Daten des linken Spielers auszuwerten
+def leftPlayerThread(connection):
+    leftPlayerConnection = connection
+    while True:
+        data = leftPlayerConnection.recv(1024)
+        if data == "up":
+            LEFTPADDLEUP = True
+        elif data == "down":
+            LEFTPADDLEUP = False
+
+
+# Thread um die gesendeten Daten des rechten Spielers auszuwerten
+def rightPlayerThread(connection):
+    rightPlayerConnection = connection
+    while True:
+        data = rightPlayerConnection.recv(1024)
+        if data == "up":
+            RIGHTPADDLEUP = True
+        elif data == "down":
+            RIGHTPADDLEUP = False
 
 def main():
     pygame.init()
@@ -124,6 +149,11 @@ def main():
     score1 = 0
     score2 = 0
 
+    leftPlayerConnected = False
+    rightPlayerConnected = False
+    allPlayerConnected = False
+
+
     # Spielflaeche in einer Farbe
     SCREEN.fill(BLUE)
     # Netz in der Mitte
@@ -141,8 +171,8 @@ def main():
     ballDirY = -STARTSPEED # -1 = hoch 1 = runter
 
     # Startposition der Schlaeger
-    playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
-    playerTwoPosition = (WINDOWHEIGHT - PADDLESIZE) /2
+    playerOnePosition = PADDLELOWERPOSITION
+    playerTwoPosition = PADDLELOWERPOSITION
 
     # Erstellen der Schlaeger
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
@@ -154,13 +184,43 @@ def main():
     drawPaddle(paddle2)
     drawBall(ballX,ballY)
 
+    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
+    # für die jeweiligen Spieler startet
+    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = ""
+    port=5000
+    gameSocket.bind((host,port))
+    gameSocket.listen(5)
+
+    while not allPlayerConnected :
+        if leftPlayerConnected and rightPlayerConnected :
+            allPlayerConnected = True
+        else:
+            connection,address = gameSocket.accept()
+            print("Got connection",addr)
+            data = connection.recv(1024)
+            print ("got data",data)
+            if data == "left":
+                leftPlayerConnected = True
+                connection.send("Thank you for connecting")
+                leftThread = Thread(target=leftPlayerThread, args=(connection,))
+                leftThread.start()
+
+            elif data == "right":
+                rightPlayerConnected = True
+                connection.send("Thank you for connecting") 
+                rightThread = Thread(target=rightPlayerThread, args=(connection,))
+                rightThread.start()
+
+        
+        
+
+
     while True: 
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-
-
                 
         pressed = pygame.key.get_pressed()
 
@@ -178,6 +238,18 @@ def main():
         if pressed[pygame.K_UP]:
             paddle2.y = PADDLEUPPERPOSITION
         if pressed[pygame.K_DOWN]:
+            paddle2.y = PADDLELOWERPOSITION
+
+
+        if LEFTPADDLEUP:
+            paddle1.y = PADDLEUPPERPOSITION
+        else:
+            paddle1.y = PADDLELOWERPOSITION
+
+        #Steuerung rechter Schlaeger
+        if RIGHTPADDLEUP:
+            paddle2.y = PADDLEUPPERPOSITION
+        else:
             paddle2.y = PADDLELOWERPOSITION
 
 

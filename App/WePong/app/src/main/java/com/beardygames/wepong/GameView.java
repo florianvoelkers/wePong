@@ -34,7 +34,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
     }
 
-    public void drawCanvas(double angle, float [] accel){
+    public void drawCanvas(double angle){
+        if (angle < 0){
+            angle = angle + 360;
+        }
         Canvas canvas = surfaceHolder.lockCanvas();
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
@@ -43,10 +46,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         paint.setTextAlign(Paint.Align.CENTER);
 
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-        canvas.drawText("Roll-Angle: " + angle, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.25f, paint);
-        canvas.drawText("Acceleration: " + accel[0], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f - 64, paint);
-        canvas.drawText("" + accel[1], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f, paint);
-        canvas.drawText("" + accel[2], canvas.getWidth() * 0.5f, canvas.getHeight() * 0.75f + 64, paint);
+        canvas.drawText("Angle: " + (int)angle, canvas.getWidth() * 0.5f, canvas.getHeight() * 0.25f, paint);
 
         surfaceHolder.unlockCanvasAndPost(canvas);
     }

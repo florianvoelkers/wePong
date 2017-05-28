@@ -29,7 +29,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     //private static final int SERVERPORT = 5000;
     //private static final String SERVER_IP = "192.168.0.1";
 
-    private double roll;
+    private double azimuth;
     private float [] accel;
 
     @Override
@@ -43,7 +43,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
 
-        roll = 0;
+        azimuth = 0;
         accel = new float[3];
         for (int i = 0; i < accel.length; i++){
             accel[i] = 0;
@@ -82,15 +82,15 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             //Azimuth darstellen
-            roll = orientationAngles[2] * 360 / (2 * Math.PI);
+            azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
         }
-        else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
+        if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
             accel[0] = event.values[0];
             accel[1] = event.values[1];
             accel[2] = event.values[2];
         }
 
-        view.drawCanvas(roll, accel);
+        view.drawCanvas(azimuth);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
-        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        //mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override

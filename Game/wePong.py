@@ -2,7 +2,7 @@ import pygame, sys
 from pygame.locals import *
 import random
 import socket
-from threading import Thread
+import threading
 
 
 # Spielgeschwindigkeit
@@ -31,6 +31,7 @@ PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 4
 LEFTPADDLEUP = False
 RIGHTPADDLEUP = False
 
+GAMESTART = False
 
 # Arena zeichnen
 def drawArena():
@@ -112,23 +113,64 @@ def displayScore(player, score):
 # Thread um die gesendeten Daten des linken Spielers auszuwerten
 def leftPlayerThread(connection):
     leftPlayerConnection = connection
+    global LEFTPADDLEUP 
     while True:
         data = leftPlayerConnection.recv(1024)
         if data == "up":
-            LEFTPADDLEUP = True
+            LEFTPADDLEUP= True
         elif data == "down":
             LEFTPADDLEUP = False
-
 
 # Thread um die gesendeten Daten des rechten Spielers auszuwerten
 def rightPlayerThread(connection):
     rightPlayerConnection = connection
+    global RIGHTPADDLEUP
     while True:
         data = rightPlayerConnection.recv(1024)
         if data == "up":
             RIGHTPADDLEUP = True
         elif data == "down":
             RIGHTPADDLEUP = False
+
+# Thread der auf neue Verbindungen wartet
+def serverThread():
+    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
+    # fuer die jeweiligen Spieler startet
+    global GAMESTART
+    leftPlayerConnected = False
+    rightPlayerConnected = False
+    print("ServerThread startet")
+
+    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = ""
+    port=5000
+    gameSocket.bind((host,port))
+    gameSocket.listen(5)
+    print("socket hoert zu")
+    while True:
+        print ("in while schleife des servers")
+        if leftPlayerConnected and rightPlayerConnected:
+           print ("gamestart = true und break der whileschleife")
+           GAMESTART = True
+           break
+        else:
+            connection,address = gameSocket.accept()
+            print("Got connection",addr)
+            data = connection.recv(1024)
+            print ("got data",data)
+            if data == "left":
+                leftPlayerConnected = True
+                connection.send("Thank you for connecting")
+                leftThread = threading.Thread(target=leftPlayerThread, args=(connection,))
+                leftThread.start()
+
+            elif data == "right":
+                rightPlayerConnected = True
+                connection.send("Thank you for connecting") 
+                rightThread = threading.Thread(target=rightPlayerThread, args=(connection,))
+                rightThread.start()
+
+
 
 def main():
     pygame.init()
@@ -148,10 +190,6 @@ def main():
 
     score1 = 0
     score2 = 0
-
-    leftPlayerConnected = False
-    rightPlayerConnected = False
-    allPlayerConnected = False
 
 
     # Spielflaeche in einer Farbe
@@ -182,95 +220,79 @@ def main():
     drawArena()
     drawPaddle(paddle1)
     drawPaddle(paddle2)
-    drawBall(ballX,ballY)
+    drawBall(ballX,ballY)   
 
-    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
-    # für die jeweiligen Spieler startet
-    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = ""
-    port=5000
-    gameSocket.bind((host,port))
-    gameSocket.listen(5)
+    print ("vor dem  startet des Threads")
+    # ServerThread starten
+    threading.Thread(target=serverThread, args=()).start()
+    print ("nach dem starten des Threads")
 
-    while not allPlayerConnected :
-        if leftPlayerConnected and rightPlayerConnected :
-            allPlayerConnected = True
-        else:
-            connection,address = gameSocket.accept()
-            print("Got connection",addr)
-            data = connection.recv(1024)
-            print ("got data",data)
-            if data == "left":
-                leftPlayerConnected = True
-                connection.send("Thank you for connecting")
-                leftThread = Thread(target=leftPlayerThread, args=(connection,))
-                leftThread.start()
-
-            elif data == "right":
-                rightPlayerConnected = True
-                connection.send("Thank you for connecting") 
-                rightThread = Thread(target=rightPlayerThread, args=(connection,))
-                rightThread.start()
-
-        
-        
-
-
-    while True: 
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-                
+    while True:
+        # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
 
+        # Spiel beenden wenn Escape gedrueckt wird
         if pressed[pygame.K_ESCAPE]:
             pygame.quit()
             sys.exit()
 
-        # Steuerung linker Schlaeger
-        if pressed[pygame.K_w]:
-            paddle1.y = PADDLEUPPERPOSITION
-        if pressed[pygame.K_s]:
-            paddle1.y = PADDLELOWERPOSITION
+        if GAMESTART:
+            print ("gamestart true ")
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                    
+            # Steuerung linker Schlaeger
+            if pressed[pygame.K_w]:
+                paddle1.y = PADDLEUPPERPOSITION
+            if pressed[pygame.K_s]:
+                paddle1.y = PADDLELOWERPOSITION
 
-        #Steuerung rechter Schlaeger
-        if pressed[pygame.K_UP]:
-            paddle2.y = PADDLEUPPERPOSITION
-        if pressed[pygame.K_DOWN]:
-            paddle2.y = PADDLELOWERPOSITION
+            #Steuerung rechter Schlaeger
+            if pressed[pygame.K_UP]:
+                paddle2.y = PADDLEUPPERPOSITION
+            if pressed[pygame.K_DOWN]:
+                paddle2.y = PADDLELOWERPOSITION
 
 
-        if LEFTPADDLEUP:
-            paddle1.y = PADDLEUPPERPOSITION
+            if LEFTPADDLEUP:
+                paddle1.y = PADDLEUPPERPOSITION
+            else:
+                paddle1.y = PADDLELOWERPOSITION
+
+            #Steuerung rechter Schlaeger
+            if RIGHTPADDLEUP:
+                paddle2.y = PADDLEUPPERPOSITION
+            else:
+                paddle2.y = PADDLELOWERPOSITION
+
+
+            drawArena()
+            drawPaddle(paddle1)
+            drawPaddle(paddle2)
+            drawBall(ball.x,ball.y)
+
+            ball = moveBall(ball, ballDirX, ballDirY)
+            ballDirY = checkEdgeCollision(ball, ballDirY)
+            ballDirX = ballDirX * checkHitBall(ball, paddle1, paddle2, ballDirX)
+            score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
+            score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)
+
+
+            displayScore(True,score1)
+            displayScore(False,score2)
+
+
+            pygame.display.update()
+            FPSCLOCK.tick(FPS)
         else:
-            paddle1.y = PADDLELOWERPOSITION
-
-        #Steuerung rechter Schlaeger
-        if RIGHTPADDLEUP:
-            paddle2.y = PADDLEUPPERPOSITION
-        else:
-            paddle2.y = PADDLELOWERPOSITION
-
-
-        drawArena()
-        drawPaddle(paddle1)
-        drawPaddle(paddle2)
-        drawBall(ball.x,ball.y)
-
-        ball = moveBall(ball, ballDirX, ballDirY)
-        ballDirY = checkEdgeCollision(ball, ballDirY)
-        ballDirX = ballDirX * checkHitBall(ball, paddle1, paddle2, ballDirX)
-        score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
-        score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)
-
-
-        displayScore(True,score1)
-        displayScore(False,score2)
-
-
-        pygame.display.update()
-        FPSCLOCK.tick(FPS)
+            drawArena()
+            drawPaddle(paddle1)
+            drawPaddle(paddle2)
+            drawBall(ball.x,ball.y)
+            pygame.display.update()
+            FPSCLOCK.tick(FPS)
 
 if __name__=='__main__':
     main()

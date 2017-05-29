@@ -201,12 +201,13 @@ def main():
     lowerEdge = pygame.draw.rect(SCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
 
     # Ball Startposition
-    ballX = WINDOWWIDTH/2 - LINETHICKNESS/2
-    ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
+    ballX = WINDOWWIDTH/2 - LINETHICKNESS/2 + LINETHICKNESS*4
+    ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2 - LINETHICKNESS*2
 
     # Ball Flugrichtung
-    ballDirX = -STARTSPEED # -1 = links 1 = rechts
-    ballDirY = -STARTSPEED # -1 = hoch 1 = runter
+    ramdomDir = random.sample([-STARTSPEED, STARTSPEED],k=2)
+    ballDirX = ramdomDir[0]  # -1 = links 1 = rechts
+    ballDirY = ramdomDir[1] # -1 = hoch 1 = runter
 
     # Startposition der Schlaeger
     playerOnePosition = PADDLELOWERPOSITION

@@ -69,6 +69,9 @@ def checkEdgeCollision(ball, ballDirY):
 
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
+    global RIGHTPADDLESPEED
+    global LEFTPADDLESPEED
+    
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
         if RIGHTPADDLESPEED > 0:
             return -1 * RIGHTPADDLESPEED
@@ -89,8 +92,8 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
 def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
     def resetBall (score):
-        ball.x = WINDOWWIDTH/2 - LINETHICKNESS/2
-        ball.y = WINDOWHEIGHT/2 - LINETHICKNESS/2
+        ball.x = WINDOWWIDTH/2 - LINETHICKNESS/2 + LINETHICKNESS*4
+        ball.y = WINDOWHEIGHT/2 - LINETHICKNESS/2 - LINETHICKNESS*2
         ballDirY = random.sample([-1, 1],k=1)
         ballDirX = random.sample([-1, 1],k=1)
         return (ball,ballDirX[0],ballDirY[0])
@@ -131,6 +134,8 @@ def playerThread(connection):
     playerConnection = connection
     global RIGHTPADDLEUP
     global RIGHTPADDLESPEED
+    global LEFTPADDLEUP
+    global LEFTPADDLESPEED
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
 

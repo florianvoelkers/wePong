@@ -133,22 +133,23 @@ def playerThread(connection):
 
     while True:
         data = playerConnection.recv(1024)
-        position, speed = data.split (":")
-        print (player,position, speed)
+        if data.count(":") == 1:
+            position, speed = data.split (":")
+            print (player,position, speed)
 
-        if player == "player1":
-            if position == "up":
-                LEFTPADDLEUP = True
-            elif position == "down":
-                LEFTPADDLEUP = False
-            LEFTPADDLESPEED = speed
+            if player == "player1":
+                if position == "up":
+                    LEFTPADDLEUP = True
+                elif position == "down":
+                    LEFTPADDLEUP = False
+                LEFTPADDLESPEED = speed
 
-        elif player == "player2":
-            if position == "up":
-                RIGHTPADDLEUP = True
-            elif position == "down":
-                RIGHTPADDLEUP = False
-            RIGHTPADDLESPEED = speed
+            elif player == "player2":
+                if position == "up":
+                    RIGHTPADDLEUP = True
+                elif position == "down":
+                    RIGHTPADDLEUP = False
+                RIGHTPADDLESPEED = speed
 
 
 # Thread der auf neue Verbindungen wartet

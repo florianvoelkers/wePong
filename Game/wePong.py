@@ -101,9 +101,9 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 # Anzeige des Spieler Scores
 def displayScore(player, score):
     if player: 
-        postion = WINDOWWIDTH - 150 
-    else:
         postion = 150 
+    else:
+        postion = WINDOWWIDTH - 150 
 
     resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
     resultRect = resultSurf.get_rect()
@@ -155,18 +155,18 @@ def serverThread():
            break
         else:
             connection,address = gameSocket.accept()
-            print("Got connection",addr)
+            print("Got connection",address)
             data = connection.recv(1024)
             print ("got data",data)
-            if data == "left":
+            if data == "player1":
                 leftPlayerConnected = True
-                connection.send("Thank you for connecting")
+                connection.send("connected")
                 leftThread = threading.Thread(target=leftPlayerThread, args=(connection,))
                 leftThread.start()
 
-            elif data == "right":
+            elif data == "player2":
                 rightPlayerConnected = True
-                connection.send("Thank you for connecting") 
+                connection.send("connected") 
                 rightThread = threading.Thread(target=rightPlayerThread, args=(connection,))
                 rightThread.start()
 
@@ -231,14 +231,14 @@ def main():
     while True:
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
-
+        print ("escape",pressed[pygame.K_ESCAPE])
         # Spiel beenden wenn Escape gedrueckt wird
         if pressed[pygame.K_ESCAPE]:
+            print ("escape")
             pygame.quit()
             sys.exit()
 
         if GAMESTART:
-            print ("gamestart true ")
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()

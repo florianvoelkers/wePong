@@ -70,9 +70,19 @@ def checkEdgeCollision(ball, ballDirY):
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
-        return -1 * RIGHTPADDLESPEED
+        if RIGHTPADDLESPEED > 0:
+            return -1 * RIGHTPADDLESPEED
+        elif RIGHTPADDLESPEED < 0:
+            return 1 * RIGHTPADDLESPEED
+        else:
+            return -1
     elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
-        return -1 * LEFTPADDLESPEED
+        if LEFTPADDLESPEED > 0:
+            return -1 * LEFTPADDLESPEED
+        elif LEFTPADDLESPEED < 0:
+            return 1 * LEFTPADDLESPEED
+        else:
+            return -1
     else: return 1
 
 # Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 

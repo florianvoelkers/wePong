@@ -126,6 +126,7 @@ def playerThread(connection):
 
     data = playerConnection.recv(1024)
     player = data
+    print ("player",player)
     if player == "player1":
         LEFTPLAYERCONNECTED = True
     elif player == "player2":
@@ -135,8 +136,8 @@ def playerThread(connection):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             position, speed = data.split (":")
-            print (player,position, speed)
-
+            print (player, position, speed)
+        
             if player == "player1":
                 if position == "up":
                     LEFTPADDLEUP = True
@@ -167,16 +168,18 @@ def serverThread():
     gameSocket.bind((host,port))
     gameSocket.listen(5)
     print("socket hoert zu")
+    playerCount = 0
+    while playerCount < 2:
+        print ("waiting for", 2-playerCount ,"connection(s)")
+        connection,address = gameSocket.accept()
+        print ("got connection",address)
+        playerCount+= 1
+        threading.Thread(target=playerThread, args=(connection,)).start()
     while True:
-        print ("in while schleife des servers")
         if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
-           print ("gamestart = true und break der whileschleife")
-           GAMESTART = True
-           break
-        else:
-            connection,address = gameSocket.accept()
-            threading.Thread(target=playerThread, args=(connection,)).start()
-
+            print ("gamestart = true und break der whileschleife")
+            GAMESTART = True
+            break
 
 def main():
     pygame.init()

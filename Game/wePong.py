@@ -15,7 +15,7 @@ WINDOWHEIGHT = 720
 
 # Schlaegergroesse
 PADDLESIZE = WINDOWHEIGHT / 2
-PADDLEOFFSET = - 40
+PADDLEOFFSET = 40
 LINETHICKNESS = 4
 
 # Farben vor definieren
@@ -29,9 +29,13 @@ PADDLEUPPERPOSITION = 4
 PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 4
 
 LEFTPADDLEUP = False
+LEFTPADDLESPEED = 1
 RIGHTPADDLEUP = False
+RIGHTPADDLESPEED = 1
 
 GAMESTART = False
+LEFTPLAYERCONNECTED = False
+RIGHTPLAYERCONNECTED = False
 
 # Arena zeichnen
 def drawArena():
@@ -66,9 +70,9 @@ def checkEdgeCollision(ball, ballDirY):
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
-        return -1
+        return -1 * RIGHTPADDLESPEED
     elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
-        return -1
+        return -1 * LEFTPADDLESPEED
     else: return 1
 
 # Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
@@ -110,35 +114,50 @@ def displayScore(player, score):
     resultRect.topleft = (postion, 25)
     SCREEN.blit(resultSurf, resultRect)
 
-# Thread um die gesendeten Daten des linken Spielers auszuwerten
-def leftPlayerThread(connection):
-    leftPlayerConnection = connection
-    global LEFTPADDLEUP 
-    while True:
-        data = leftPlayerConnection.recv(1024)
-        if data == "up":
-            LEFTPADDLEUP= True
-        elif data == "down":
-            LEFTPADDLEUP = False
 
-# Thread um die gesendeten Daten des rechten Spielers auszuwerten
-def rightPlayerThread(connection):
-    rightPlayerConnection = connection
+
+# Thread um die gesendeten Daten der Spielers auszuwerten
+def playerThread(connection):
+    playerConnection = connection
     global RIGHTPADDLEUP
+    global RIGHTPADDLESPEED
+    global LEFTPLAYERCONNECTED
+    global RIGHTPLAYERCONNECTED
+
+    data = playerConnection.recv(1024)
+    player = data
+    if player == "player1":
+        LEFTPLAYERCONNECTED = True
+    elif player == "player2":
+        RIGHTPLAYERCONNECTED = True
+
     while True:
-        data = rightPlayerConnection.recv(1024)
-        if data == "up":
-            RIGHTPADDLEUP = True
-        elif data == "down":
-            RIGHTPADDLEUP = False
+        data = playerConnection.recv(1024)
+        position, speed = data.split (":")
+        print (player,position, speed)
+
+        if player == "player1":
+            if position == "up":
+                LEFTPADDLEUP = True
+            elif position == "down":
+                LEFTPADDLEUP = False
+            LEFTPADDLESPEED = speed
+
+        elif player == "player2":
+            if position == "up":
+                RIGHTPADDLEUP = True
+            elif position == "down":
+                RIGHTPADDLEUP = False
+            RIGHTPADDLESPEED = speed
+
 
 # Thread der auf neue Verbindungen wartet
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
     # fuer die jeweiligen Spieler startet
     global GAMESTART
-    leftPlayerConnected = False
-    rightPlayerConnected = False
+    global LEFTPLAYERCONNECTED
+    global RIGHTPLAYERCONNECTED
     print("ServerThread startet")
 
     gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -149,27 +168,13 @@ def serverThread():
     print("socket hoert zu")
     while True:
         print ("in while schleife des servers")
-        if leftPlayerConnected and rightPlayerConnected:
+        if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
            print ("gamestart = true und break der whileschleife")
            GAMESTART = True
            break
         else:
             connection,address = gameSocket.accept()
-            print("Got connection",address)
-            data = connection.recv(1024)
-            print ("got data",data)
-            if data == "player1":
-                leftPlayerConnected = True
-                connection.send("connected")
-                leftThread = threading.Thread(target=leftPlayerThread, args=(connection,))
-                leftThread.start()
-
-            elif data == "player2":
-                rightPlayerConnected = True
-                connection.send("connected") 
-                rightThread = threading.Thread(target=rightPlayerThread, args=(connection,))
-                rightThread.start()
-
+            threading.Thread(target=playerThread, args=(connection,)).start()
 
 
 def main():
@@ -231,7 +236,6 @@ def main():
     while True:
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
-        print ("escape",pressed[pygame.K_ESCAPE])
         # Spiel beenden wenn Escape gedrueckt wird
         if pressed[pygame.K_ESCAPE]:
             print ("escape")

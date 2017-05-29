@@ -10,6 +10,7 @@ import android.os.PowerManager;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import java.io.BufferedReader;
@@ -38,7 +39,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     private static final String SERVER_IP = "192.168.0.1";
 
     private double azimuth;
-    private double startAngle;
+    private int startAngle;
+    private int rangeLeft;
+    private int rangeRight;
     private String upOrDown;
     private boolean playerLeft;
     private float [] accel;
@@ -59,10 +62,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyWakelockTag");
-        wakeLock.acquire();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         azimuth = 0;
         accel = new float[3];
@@ -86,74 +86,25 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
             //Azimuth darstellen
             azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
+            System.out.println("new azimuth: " + azimuth);
             if (counter == 1){
-                startAngle = azimuth;
+                startAngle = (int)azimuth;
+                rangeLeft = startAngle - 90;
+                rangeRight = startAngle + 90;
+
+                if (rangeLeft < -180){
+                    rangeLeft += 360;
+                }
+
+                if (rangeRight > 180){
+                    rangeRight -= 360;
+                }
             }
         }
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
             accel[0] = event.values[0];
             accel[1] = event.values[1];
             accel[2] = event.values[2];
-        }
-    }
-
-    private void sendData(Socket socket){
-        System.out.println("in send data");
-        while (true){
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            try {
-                PrintWriter out = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream())),
-                        true);
-                if (playerLeft){
-                    int rangeLeft = (int)startAngle - 90;
-                    int rangeRight = (int)startAngle + 90;
-
-                    if (rangeLeft < 0){
-                        rangeLeft += 360;
-                    }
-                    if (rangeRight > 360){
-                        rangeRight -= 360;
-                    }
-
-                    if (azimuth >= rangeLeft || azimuth <= rangeRight){
-                        upOrDown = "down";
-                    }
-                    else {
-                        upOrDown = "up";
-                    }
-
-                    System.out.println(startAngle + azimuth + rangeLeft + rangeRight);
-                }
-                else {
-                    int rangeLeft = (int)startAngle - 90;
-                    int rangeRight = (int)startAngle + 90;
-
-                    if (rangeLeft < 0){
-                        rangeLeft += 360;
-                    }
-                    if (rangeRight > 360){
-                        rangeRight -= 360;
-                    }
-
-                    if (azimuth >= rangeLeft || azimuth <= rangeRight){
-                        upOrDown = "up";
-                    }
-                    else {
-                        upOrDown = "down";
-                    }
-
-                    System.out.println(startAngle + azimuth + rangeLeft + rangeRight);
-                }
-                out.print(upOrDown);
-                out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -188,17 +139,8 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                 out.print(str);
                 out.flush();
 
-                sendData(socket);
-                /*String incomingMessage;
-                while (true){
-                    incomingMessage = in.readLine();
-                    System.out.println(incomingMessage);
+                new Thread(new DataThread(socket)).start();
 
-                    if (incomingMessage.equals("connected")){
-                        sendData(socket);
-                        break;
-                    }
-                }*/
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -240,6 +182,64 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
         }
 
+    }
+
+    class DataThread implements Runnable{
+
+        private Socket socket;
+
+        public DataThread(Socket socket){
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("in send data");
+            while (true){
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    PrintWriter out = new PrintWriter(new BufferedWriter(
+                            new OutputStreamWriter(socket.getOutputStream())),
+                            true);
+                    if (playerLeft){
+                        if (azimuth >= rangeLeft && azimuth <= rangeRight){
+                            upOrDown = "down";
+                        }
+                        else {
+                            upOrDown = "up";
+                        }
+
+                        /*System.out.println("start: " + startAngle);
+                        System.out.println("azi: " + (int)azimuth);
+                        System.out.println("left: " + rangeLeft);
+                        System.out.println("right: " + rangeRight);*/
+                    }
+                    else {
+
+                        if (azimuth >= rangeLeft && azimuth <= rangeRight){
+                            upOrDown = "up";
+                        }
+                        else {
+                            upOrDown = "down";
+                        }
+
+                        /*System.out.println("start: " + startAngle);
+                        System.out.println("azi: " + (int)azimuth);
+                        System.out.println("left: " + rangeLeft);
+                        System.out.println("right: " + rangeRight);*/
+                    }
+                    System.out.println(upOrDown);
+                    out.print(upOrDown);
+                    out.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }

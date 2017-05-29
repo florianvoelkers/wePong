@@ -74,15 +74,19 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
     
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
         if RIGHTPADDLESPEED > 0:
+            print("Rightpaddlespeed",RIGHTPADDLESPEED)
             return -1 * RIGHTPADDLESPEED
         elif RIGHTPADDLESPEED < 0:
-            return 1 * RIGHTPADDLESPEED
+            print("Rightpaddlespeed",RIGHTPADDLESPEED)
+            return RIGHTPADDLESPEED
         else:
             return -1
     elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
         if LEFTPADDLESPEED > 0:
+            print("LEFTPADDLESPEED",LEFTPADDLESPEED)
             return -1 * LEFTPADDLESPEED
         elif LEFTPADDLESPEED < 0:
+            print("LEFTPADDLESPEED",LEFTPADDLESPEED)
             return 1 * LEFTPADDLESPEED
         else:
             return -1
@@ -151,22 +155,23 @@ def playerThread(connection):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             position, speed = data.split (":")
-            print (player, position, speed)
+            #print (player, position, speed)
         
             if player == "player1":
                 if position == "up":
                     LEFTPADDLEUP = True
                 elif position == "down":
                     LEFTPADDLEUP = False
-                LEFTPADDLESPEED = speed
+                LEFTPADDLESPEED = int(speed)
+                print ("Leftpaddlespeed",LEFTPADDLESPEED)
 
             elif player == "player2":
                 if position == "up":
                     RIGHTPADDLEUP = True
                 elif position == "down":
                     RIGHTPADDLEUP = False
-                RIGHTPADDLESPEED = speed
-
+                RIGHTPADDLESPEED = int(speed)
+                print("rightpaddlespeed",RIGHTPADDLESPEED)
 
 # Thread der auf neue Verbindungen wartet
 def serverThread():

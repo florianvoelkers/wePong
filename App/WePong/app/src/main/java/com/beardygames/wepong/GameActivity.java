@@ -99,6 +99,12 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                 if (rangeRight > 180){
                     rangeRight -= 360;
                 }
+
+                if (rangeLeft > rangeRight){
+                    int cache = rangeLeft;
+                    rangeLeft = rangeRight;
+                    rangeRight = cache;
+                }
             }
         }
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
@@ -220,6 +226,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                     }
                     else {
 
+                        System.out.println("start: " + startAngle + " range: " + rangeLeft + " " + rangeRight + " azimuth: " + azimuth);
                         if (azimuth >= rangeLeft && azimuth <= rangeRight){
                             upOrDown = "up";
                         }
@@ -233,7 +240,8 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                         System.out.println("right: " + rangeRight);*/
                     }
                     System.out.println(upOrDown);
-                    out.print(upOrDown);
+                    String data = upOrDown + ":" + (int)accel[0];
+                    out.print(data);
                     out.flush();
                 } catch (IOException e) {
                     e.printStackTrace();

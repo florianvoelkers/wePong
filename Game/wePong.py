@@ -14,7 +14,7 @@ WINDOWWIDTH = 1280
 WINDOWHEIGHT = 720
 
 # Schlaegergroesse
-PADDLESIZE = WINDOWHEIGHT / 2
+PADDLESIZE = WINDOWHEIGHT / 2 + 40
 PADDLEOFFSET = 40
 LINETHICKNESS = 4
 
@@ -25,8 +25,9 @@ BLUE = [0, 0, 255]
 GREEN = [0, 255, 0]
 
 STARTSPEED = 1
+MAXSPEED = 8
 PADDLEUPPERPOSITION = 4
-PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 4
+PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 
 LEFTPADDLEUP = False
 LEFTPADDLESPEED = 1
@@ -36,6 +37,7 @@ RIGHTPADDLESPEED = 1
 GAMESTART = False
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
+
 
 # Arena zeichnen
 def drawArena():
@@ -71,23 +73,32 @@ def checkEdgeCollision(ball, ballDirY):
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
+    global MAXSPEED
     
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
         if RIGHTPADDLESPEED > 0:
-            print("Rightpaddlespeed",RIGHTPADDLESPEED)
-            return -1 * RIGHTPADDLESPEED
+            if RIGHTPADDLESPEED > MAXSPEED:
+                return -1 * MAXSPEED
+            else:
+                return -1 * RIGHTPADDLESPEED
         elif RIGHTPADDLESPEED < 0:
-            print("Rightpaddlespeed",RIGHTPADDLESPEED)
-            return RIGHTPADDLESPEED
+            if (RIGHTPADDLESPEED * -1) > RIGHTPADDLESPEED:
+                return -1 * MAXSPEED
+            else:
+                return RIGHTPADDLESPEED
         else:
             return -1
     elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
         if LEFTPADDLESPEED > 0:
-            print("LEFTPADDLESPEED",LEFTPADDLESPEED)
-            return -1 * LEFTPADDLESPEED
+            if LEFTPADDLESPEED > MAXSPEED:
+                return -1 * MAXSPEED
+            else:
+                return -1 * LEFTPADDLESPEED
         elif LEFTPADDLESPEED < 0:
-            print("LEFTPADDLESPEED",LEFTPADDLESPEED)
-            return 1 * LEFTPADDLESPEED
+            if LEFTPADDLESPEED < (MAXSPEED * -1):
+                return -1 * MAXSPEED
+            else:
+                return LEFTPADDLESPEED
         else:
             return -1
     else: return 1
@@ -163,7 +174,6 @@ def playerThread(connection):
                 elif position == "down":
                     LEFTPADDLEUP = False
                 LEFTPADDLESPEED = int(speed)
-                print ("Leftpaddlespeed",LEFTPADDLESPEED)
 
             elif player == "player2":
                 if position == "up":
@@ -171,7 +181,6 @@ def playerThread(connection):
                 elif position == "down":
                     RIGHTPADDLEUP = False
                 RIGHTPADDLESPEED = int(speed)
-                print("rightpaddlespeed",RIGHTPADDLESPEED)
 
 # Thread der auf neue Verbindungen wartet
 def serverThread():

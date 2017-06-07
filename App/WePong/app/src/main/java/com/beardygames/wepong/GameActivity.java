@@ -44,8 +44,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     private int rangeRight;
     private String upOrDown;
     private boolean playerLeft;
-    private float [] accel;
+    private int accel;
     private int counter = 0;
+    private int velocityCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +66,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         azimuth = 0;
-        accel = new float[3];
-        for (int i = 0; i < accel.length; i++){
-            accel[i] = 0;
-        }
+        accel = 0;
 
         new Thread(new ClientThread()).start();
     }
@@ -85,7 +83,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             //Azimuth darstellen
-            azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
+            azimuth = orientationAngles[0] * 1440 / (2 * Math.PI);
             System.out.println("new azimuth: " + azimuth);
             if (counter == 1){
                 startAngle = (int)azimuth;
@@ -108,9 +106,9 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             }
         }
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
-            accel[0] = event.values[0];
-            accel[1] = event.values[1];
-            accel[2] = event.values[2];
+            if (event.values[0] > accel){
+                accel = (int)event.values[0];
+            }
         }
     }
 
@@ -203,6 +201,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             System.out.println("in send data");
             while (true){
                 try {
+                    velocityCounter++;
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -218,11 +217,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                         else {
                             upOrDown = "up";
                         }
-
-                        /*System.out.println("start: " + startAngle);
-                        System.out.println("azi: " + (int)azimuth);
-                        System.out.println("left: " + rangeLeft);
-                        System.out.println("right: " + rangeRight);*/
                     }
                     else {
 
@@ -234,13 +228,13 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
                             upOrDown = "down";
                         }
 
-                        /*System.out.println("start: " + startAngle);
-                        System.out.println("azi: " + (int)azimuth);
-                        System.out.println("left: " + rangeLeft);
-                        System.out.println("right: " + rangeRight);*/
                     }
                     System.out.println(upOrDown);
-                    String data = upOrDown + ":" + (int)accel[0];
+                    String data = upOrDown + ":" + accel;
+                    if (velocityCounter == 15){
+                        velocityCounter = 0;
+                        accel = 0;
+                    }
                     out.print(data);
                     out.flush();
                 } catch (IOException e) {

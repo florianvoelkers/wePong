@@ -30,9 +30,7 @@ PADDLESTARTPOSTION = WINDOWHEIGHT / 2 - PADDLESIZE/2
 PADDLEUPPERPOSITION = 4
 PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 
-LEFTPADDLEUP = False
 LEFTPADDLESPEED = 0
-RIGHTPADDLEUP = False
 RIGHTPADDLESPEED = 0
 
 GAMESTART = False
@@ -128,9 +126,7 @@ def displayScore(player, score):
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection):
     playerConnection = connection
-    global RIGHTPADDLEUP
     global RIGHTPADDLESPEED
-    global LEFTPADDLEUP
     global LEFTPADDLESPEED
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
@@ -146,21 +142,13 @@ def playerThread(connection):
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
-            position, speed = data.split (":")
+            name, speed = data.split (":")
             #print (player, position, speed)
         
             if player == "player1":
-                if position == "up":
-                    LEFTPADDLEUP = True
-                elif position == "down":
-                    LEFTPADDLEUP = False
                 LEFTPADDLESPEED = int(speed)
 
             elif player == "player2":
-                if position == "up":
-                    RIGHTPADDLEUP = True
-                elif position == "down":
-                    RIGHTPADDLEUP = False
                 RIGHTPADDLESPEED = int(speed)
 
 # Thread der auf neue Verbindungen wartet
@@ -197,8 +185,6 @@ def main():
     global SCREEN
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
-    global LEFTPADDLEUP
-    global RIGHTPADDLEUP
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -267,29 +253,23 @@ def main():
                     pygame.quit()
                     sys.exit()
                     
-            # Steuerung linker Schlaeger
+            # Steuerung linker Schlaeger mit Tastatur
             if pressed[pygame.K_w]:
                 paddle1.y = paddle1.y - 5
             if pressed[pygame.K_s]:
                 paddle1.y = paddle1.y + 5
 
-            #Steuerung rechter Schlaeger
+            #Steuerung rechter Schlaeger mit Tastatur
             if pressed[pygame.K_UP]:
                 paddle2.y = paddle2.y - 5
             if pressed[pygame.K_DOWN]:
                 paddle2.y = paddle2.y + 5
 
+            # Steuerung linker Schlaeger mit Handydaten
+            paddle1.y = paddle1.y + LEFTPADDLESPEED
 
-            if LEFTPADDLEUP:
-                paddle1.y = paddle1.y - LEFTPADDLESPEED
-            else:
-                paddle1.y = paddle1.y + LEFTPADDLESPEED
-
-            #Steuerung rechter Schlaeger
-            if RIGHTPADDLEUP:
-                paddle2.y = paddle2.y - RIGHTPADDLESPEED
-            else:
-                paddle2.y = paddle2.y + RIGHTPADDLESPEED
+            #Steuerung rechter Schlaeger mit Handydaten
+            paddle2.y = paddle2.y + RIGHTPADDLESPEED
 
             drawArena()
             drawPaddle(paddle1)

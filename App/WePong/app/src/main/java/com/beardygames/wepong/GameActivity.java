@@ -83,7 +83,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             //Azimuth darstellen
-            azimuth = orientationAngles[0] * 1440 / (2 * Math.PI);
+            azimuth = orientationAngles[0] * 360 / (2 * Math.PI);
             System.out.println("new azimuth: " + azimuth);
             if (counter == 1){
                 startAngle = (int)azimuth;

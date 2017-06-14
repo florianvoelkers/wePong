@@ -14,7 +14,7 @@ WINDOWWIDTH = 1280
 WINDOWHEIGHT = 720
 
 # Schlaegergroesse
-PADDLESIZE = WINDOWHEIGHT / 2 + 40
+PADDLESIZE = WINDOWHEIGHT / 8
 PADDLEOFFSET = 40
 LINETHICKNESS = 4
 
@@ -26,13 +26,14 @@ GREEN = [0, 255, 0]
 
 STARTSPEED = 1
 MAXSPEED = 8
+PADDLESTARTPOSTION = WINDOWHEIGHT / 2 - PADDLESIZE/2
 PADDLEUPPERPOSITION = 4
 PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 
 LEFTPADDLEUP = False
-LEFTPADDLESPEED = 1
+LEFTPADDLESPEED = 0
 RIGHTPADDLEUP = False
-RIGHTPADDLESPEED = 1
+RIGHTPADDLESPEED = 0
 
 GAMESTART = False
 LEFTPLAYERCONNECTED = False
@@ -41,7 +42,6 @@ RIGHTPLAYERCONNECTED = False
 
 # Arena zeichnen
 def drawArena():
-
     SCREEN.fill(BLUE)
     net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
 
@@ -51,6 +51,13 @@ def drawArena():
 
 # Schlaeger zeichnen
 def drawPaddle(paddle):
+    #Stoppt den Schlaeger am unteren Rand
+    if paddle.bottom > WINDOWHEIGHT - LINETHICKNESS:
+        paddle.bottom = WINDOWHEIGHT - LINETHICKNESS
+    #Stoppt den Schlaeger am oberen Rand
+    elif paddle.top < LINETHICKNESS:
+        paddle.top = LINETHICKNESS
+    #Schlaeger zeichnen
     pygame.draw.rect(SCREEN, WHITE, paddle)
 
 # Ball zeichnen
@@ -71,36 +78,10 @@ def checkEdgeCollision(ball, ballDirY):
 
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
-    global RIGHTPADDLESPEED
-    global LEFTPADDLESPEED
-    global MAXSPEED
-    
     if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
-        if RIGHTPADDLESPEED > 0:
-            if RIGHTPADDLESPEED > MAXSPEED:
-                return -1 * MAXSPEED
-            else:
-                return -1 * RIGHTPADDLESPEED
-        elif RIGHTPADDLESPEED < 0:
-            if (RIGHTPADDLESPEED * -1) > RIGHTPADDLESPEED:
-                return -1 * MAXSPEED
-            else:
-                return RIGHTPADDLESPEED
-        else:
-            return -1
+        return -1
     elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
-        if LEFTPADDLESPEED > 0:
-            if LEFTPADDLESPEED > MAXSPEED:
-                return -1 * MAXSPEED
-            else:
-                return -1 * LEFTPADDLESPEED
-        elif LEFTPADDLESPEED < 0:
-            if LEFTPADDLESPEED < (MAXSPEED * -1):
-                return -1 * MAXSPEED
-            else:
-                return LEFTPADDLESPEED
-        else:
-            return -1
+        return -1
     else: return 1
 
 # Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
@@ -214,6 +195,10 @@ def main():
     pygame.init()
 
     global SCREEN
+    global RIGHTPADDLESPEED
+    global LEFTPADDLESPEED
+    global LEFTPADDLEUP
+    global RIGHTPADDLEUP
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -248,8 +233,8 @@ def main():
     ballDirY = ramdomDir[1] # -1 = hoch 1 = runter
 
     # Startposition der Schlaeger
-    playerOnePosition = PADDLELOWERPOSITION
-    playerTwoPosition = PADDLELOWERPOSITION
+    playerOnePosition = PADDLESTARTPOSTION
+    playerTwoPosition = PADDLESTARTPOSTION
 
     # Erstellen der Schlaeger
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
@@ -267,6 +252,7 @@ def main():
     print ("nach dem starten des Threads")
 
     while True:
+
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
         # Spiel beenden wenn Escape gedrueckt wird
@@ -283,28 +269,27 @@ def main():
                     
             # Steuerung linker Schlaeger
             if pressed[pygame.K_w]:
-                paddle1.y = PADDLEUPPERPOSITION
+                paddle1.y = paddle1.y - 5
             if pressed[pygame.K_s]:
-                paddle1.y = PADDLELOWERPOSITION
+                paddle1.y = paddle1.y + 5
 
             #Steuerung rechter Schlaeger
             if pressed[pygame.K_UP]:
-                paddle2.y = PADDLEUPPERPOSITION
+                paddle2.y = paddle2.y - 5
             if pressed[pygame.K_DOWN]:
-                paddle2.y = PADDLELOWERPOSITION
+                paddle2.y = paddle2.y + 5
 
 
             if LEFTPADDLEUP:
-                paddle1.y = PADDLEUPPERPOSITION
+                paddle1.y = paddle1.y - LEFTPADDLESPEED
             else:
-                paddle1.y = PADDLELOWERPOSITION
+                paddle1.y = paddle1.y + LEFTPADDLESPEED
 
             #Steuerung rechter Schlaeger
             if RIGHTPADDLEUP:
-                paddle2.y = PADDLEUPPERPOSITION
+                paddle2.y = paddle2.y - RIGHTPADDLESPEED
             else:
-                paddle2.y = PADDLELOWERPOSITION
-
+                paddle2.y = paddle2.y + RIGHTPADDLESPEED
 
             drawArena()
             drawPaddle(paddle1)

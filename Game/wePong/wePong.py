@@ -246,12 +246,12 @@ def main():
             print ("escape")
             pygame.quit()
             sys.exit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
         if GAMESTART:
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
                     
             # Steuerung linker Schlaeger mit Tastatur
             if pressed[pygame.K_w]:

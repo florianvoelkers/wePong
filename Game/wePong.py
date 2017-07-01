@@ -6,12 +6,12 @@ import threading
 
 
 # Spielgeschwindigkeit
-FPS = 40
+FPS = 80
 INCREASESPEED = 6
 
 # Fenster breite und hoehe
-WINDOWWIDTH = 1280
-WINDOWHEIGHT = 720
+WINDOWWIDTH = 1824
+WINDOWHEIGHT = 984
 
 # Schlaegergroesse
 PADDLESIZE = WINDOWHEIGHT / 8
@@ -25,7 +25,7 @@ BLUE = [0, 0, 255]
 GREEN = [0, 255, 0]
 
 STARTSPEED = 1
-MAXSPEED = 8
+MAXSPEED = 2.4
 PADDLESTARTPOSTION = WINDOWHEIGHT / 2 - PADDLESIZE/2
 PADDLEUPPERPOSITION = 4
 PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
@@ -76,9 +76,9 @@ def checkEdgeCollision(ball, ballDirY):
 
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX):
-    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top < ball.top and paddle1.bottom > ball.bottom:
+    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top <= ball.top and paddle1.bottom >= ball.bottom:
         return -1
-    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*4 <= ball.right and paddle2.top < ball.top and paddle2.bottom > ball.bottom:
+    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*2 <= ball.right and paddle2.top <= ball.top and paddle2.bottom >= ball.bottom:
         return -1
     else: return 1
 
@@ -88,8 +88,8 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
     def resetBall (score):
         ball.x = WINDOWWIDTH/2 - LINETHICKNESS/2 + LINETHICKNESS*4
         ball.y = WINDOWHEIGHT/2 - LINETHICKNESS/2 - LINETHICKNESS*2
-        ballDirY = random.sample([-1, 1],k=1)
-        ballDirX = random.sample([-1, 1],k=1)
+        ballDirY = random.sample([-STARTSPEED, STARTSPEED],k=1)
+        ballDirX = random.sample([-STARTSPEED, STARTSPEED],k=1)
         return (ball,ballDirX[0],ballDirY[0])
 
     if player:
@@ -143,13 +143,13 @@ def playerThread(connection):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             name, speed = data.split (":")
-            #print (player, position, speed)
-        
+            newSpeed = int(speed) * 2
+            print (player, newSpeed)
             if player == "player1":
-                LEFTPADDLESPEED = int(speed)
+                LEFTPADDLESPEED = int(newSpeed)
 
             elif player == "player2":
-                RIGHTPADDLESPEED = int(speed)
+                RIGHTPADDLESPEED = int(newSpeed)
 
 # Thread der auf neue Verbindungen wartet
 def serverThread():

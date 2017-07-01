@@ -1,3 +1,5 @@
+#!/usr/lib/python2.7
+
 import pygame, sys
 from pygame.locals import *
 import random

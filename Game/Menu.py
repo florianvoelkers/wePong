@@ -29,6 +29,8 @@ BLACK = [0,0,0]
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
 GAMESTART = False
+PLAYER1CONNECTION = 0
+PLAYER1CONNECTION = 0
 
 def get_script_dir(follow_symlinks=True):
     if getattr(sys, 'frozen', False): 
@@ -41,27 +43,30 @@ def get_script_dir(follow_symlinks=True):
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection):
-    playerConnection = connection
+    global PLAYER1CONNECTION
+    global PLAYER2CONNECTION 
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
 
-    data = playerConnection.recv(1024)
+    data = connection.recv(1024)
     player = data
     print ("player",player)
     if player == "player1":
+        PLAYER1CONNECTION = connection
         LEFTPLAYERCONNECTED = True
     elif player == "player2":
+        PLAYER2CONNECTION = connection
         RIGHTPLAYERCONNECTED = True
 
     while True:
-        data = playerConnection.recv(1024)
+        data = connection.recv(1024)
         if data.count(":") == 1:
             name, game = data.split (":")
             
             print (player, game)
             if player == "player1" and GAMESTART:
+                wePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
             	print("Start a game")
-            	os.system(wePong.py)
 
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads

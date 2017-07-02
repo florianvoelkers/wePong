@@ -181,7 +181,7 @@ def serverThread():
             GAMESTART = True
             break
 
-def main():
+def main(connection1,connection2):
     pygame.init()
 
     global SCREEN
@@ -232,12 +232,14 @@ def main():
     drawArena()
     drawPaddle(paddle1)
     drawPaddle(paddle2)
-    drawBall(ballX,ballY)   
+    drawBall(ballX,ballY)
+    
+    threading.Thread(target=playerThread, args=(connection1,)).start()
+    threading.Thread(target=playerThread, args=(connection2,)).start()
 
-    print ("vor dem  startet des Threads")
-    # ServerThread starten
     threading.Thread(target=serverThread, args=()).start()
-    print ("nach dem starten des Threads")
+
+
 
     while True:
 

@@ -5,11 +5,12 @@ from pygame.locals import *
 import random
 import socket
 import threading
+#import Menu
 
 
 # Spielgeschwindigkeit
-FPS = 80
-INCREASESPEED = 6
+FPS = 60
+INCREASESPEED = 5
 
 # Fenster breite und hoehe
 WINDOWWIDTH = 1824
@@ -35,9 +36,10 @@ PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 LEFTPADDLESPEED = 0
 RIGHTPADDLESPEED = 0
 
-GAMESTART = False
+GAMESTART = True
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
+COUNTER = 10
 
 
 # Arena zeichnen
@@ -72,17 +74,47 @@ def moveBall(ball,ballDirX, ballDirY):
 
 # Ueberpruefen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung veraendert
 def checkEdgeCollision(ball, ballDirY):
-    if ball.top <= (LINETHICKNESS*4) or ball.bottom >= (WINDOWHEIGHT+LINETHICKNESS*4):
-        ballDirY = ballDirY * -1
+    global COUNTER
+    if ball.top < (LINETHICKNESS*4) or ball.bottom > (WINDOWHEIGHT+LINETHICKNESS*4):
+        COUNTER -= 1
+        if COUNTER <= 0:
+            COUNTER = 2
+            ballDirY = ballDirY * -1
     return ballDirY
 
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
-def checkHitBall(ball, paddle1, paddle2, ballDirX):
-    if ballDirX < 0  and paddle1.right+LINETHICKNESS*2 >= ball.left and paddle1.top <= ball.top and paddle1.bottom >= ball.bottom:
-        return -1
-    elif ballDirX > 0 and paddle2.left+LINETHICKNESS*2 <= ball.right and paddle2.top <= ball.top and paddle2.bottom >= ball.bottom:
-        return -1
-    else: return 1
+def checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY):
+    #print (ball.center,ball.top,ball.bottom,ball.left,ball.right,ball.x,ball.y)
+    if ballDirX < 0  and paddle1.right >= ball.left and paddle1.top <= ball.centery and paddle1.bottom >= ball.centery and ball.centerx >= paddle1.right :
+        contactpoint = paddle1.top - ball.centery
+        percent =(contactpoint / PADDLESIZE) +1
+        if percent > 0.8:
+            newXDir, newYDir = 0.5, -1.5
+        elif percent > 0.6:
+            newXDir, newYDir = 1.5, -0.5
+        elif percent > 0.4:
+            newXDir, newYDir = -1 * ballDirX, ballDirY
+        elif percent > 0.2:
+            newXDir, newYDir = 1.5, 0.5
+        else:
+            newXDir, newYDir = 0.5, 1.5
+        return newXDir, newYDir            
+    elif ballDirX > 0 and paddle2.left + LINETHICKNESS*2 <= ball.right and paddle2.top <= ball.centery and paddle2.bottom >= ball.centery and ball.centerx <= paddle2.left:
+        contactpoint = paddle2.top - ball.centery
+        percent =(contactpoint / PADDLESIZE) +1
+        if percent > 0.8:
+            newXDir, newYDir = -0.5, -1.5
+        elif percent > 0.6:
+            newXDir, newYDir = -1.5, -0.5
+        elif percent > 0.4:
+            newXDir, newYDir = -1 * ballDirX, ballDirY
+        elif percent > 0.2:
+            newXDir, newYDir = -1.5, 0.5
+        else:
+            newXDir, newYDir = -0.5, 1.5
+        return newXDir, newYDir        
+    else: 
+        return ballDirX, ballDirY
 
 # Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
 def checkPointScored(player,ball, score, ballDirX,ballDirY):
@@ -96,7 +128,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
     if player:
         # Ueberprueft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
-        if ball.right >= WINDOWWIDTH - PADDLEOFFSET + LINETHICKNESS*5: 
+        if ball.right >= WINDOWWIDTH + LINETHICKNESS*4: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
             return score,ball,ballDirX,ballDirY
@@ -104,7 +136,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         else: return (score,ball,ballDirX,ballDirY)
     else:
         # UeberprUeft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
-        if ball.left <= PADDLEOFFSET - LINETHICKNESS*5: 
+        if ball.left <= 0: 
             score += 1
             ball,ballDirX,ballDirY =  resetBall(score)
             return score,ball,ballDirX,ballDirY
@@ -113,6 +145,9 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
+    if score > 10:
+        Menu.main()
+        pygame.quit()
     if player: 
         postion = 150 
     else:
@@ -181,7 +216,7 @@ def serverThread():
             GAMESTART = True
             break
 
-def main(connection1,connection2):
+def main():#connection1,connection2):
     pygame.init()
 
     global SCREEN
@@ -227,6 +262,7 @@ def main(connection1,connection2):
     # Erstellen der Schlaeger
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET , playerTwoPosition, LINETHICKNESS*3,PADDLESIZE)
+
     ball = pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
     
     drawArena()
@@ -234,8 +270,8 @@ def main(connection1,connection2):
     drawPaddle(paddle2)
     drawBall(ballX,ballY)
     
-    threading.Thread(target=playerThread, args=(connection1,)).start()
-    threading.Thread(target=playerThread, args=(connection2,)).start()
+    #threading.Thread(target=playerThread, args=(connection1,)).start()
+    #threading.Thread(target=playerThread, args=(connection2,)).start()
 
     threading.Thread(target=serverThread, args=()).start()
 
@@ -282,7 +318,7 @@ def main(connection1,connection2):
 
             ball = moveBall(ball, ballDirX, ballDirY)
             ballDirY = checkEdgeCollision(ball, ballDirY)
-            ballDirX = ballDirX * checkHitBall(ball, paddle1, paddle2, ballDirX)
+            ballDirX, ballDirY = checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY)
             score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
             score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)
 

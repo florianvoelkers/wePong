@@ -8,12 +8,11 @@ import threading
 import subprocess
 import os
 import inspect
-import wePong
+import WePong
 
 
 # Spielgeschwindigkeit
-FPS = 80
-INCREASESPEED = 6
+FPS = 60
 
 # Fenster breite und hoehe
 WINDOWWIDTH = 1824
@@ -47,6 +46,7 @@ def playerThread(connection):
     global PLAYER2CONNECTION 
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
+    global GAMESTART
 
     data = connection.recv(1024)
     player = data
@@ -65,8 +65,9 @@ def playerThread(connection):
             
             print (player, game)
             if player == "player1" and GAMESTART:
-                wePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
-            	print("Start a game")
+                WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                pygame.quit()
+                print("Start a game")
 
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads

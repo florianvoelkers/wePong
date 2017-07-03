@@ -6,10 +6,10 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/menu_background"
+        android:id="@+id/pong_back"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/menu_background" />
+        app:srcCompat="@drawable/pong_back" />
 
 </LinearLayout>

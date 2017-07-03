@@ -1,8 +1,10 @@
 package com.beardygames.arcadetable;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class GameMenuActivity extends AppCompatActivity {
@@ -40,5 +42,28 @@ public class GameMenuActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int x = (int) event.getX();
+        int width = MainActivity.getScreenWidth();
+        int y = (int) event.getY();
+        int height = MainActivity.getScreenHeight();
+
+        if (y >= height * 0.66 && x <= width * 0.5){
+            Intent intent = new Intent(this, PongActivity.class);
+            startActivity(intent);
+        }
+        else if (y >= height * 0.66 && x >= width * 0.5){
+            Intent intent = new Intent(this, AirHockeyActivity.class);
+            startActivity(intent);
+        }
+        else if (y <= height * 0.33){
+            Intent intent = new Intent(this, TronActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onTouchEvent(event);
     }
 }

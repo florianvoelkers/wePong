@@ -17,6 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".GameMenuActivity" android:screenOrientation="landscape"></activity>
+        <activity android:name=".TronActivity" android:screenOrientation="landscape"></activity>
+        <activity android:name=".AirHockeyActivity" android:screenOrientation="landscape"></activity>
+        <activity android:name=".PongActivity" android:screenOrientation="landscape"></activity>
     </application>
 
 </manifest>

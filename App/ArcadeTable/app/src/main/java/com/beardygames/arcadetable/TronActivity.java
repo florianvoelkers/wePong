@@ -1,24 +1,18 @@
 package com.beardygames.arcadetable;
 
-import android.content.Intent;
-import android.content.res.Resources;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.MotionEvent;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class TronActivity extends AppCompatActivity {
 
     private View decorView;
-    private ImageView startImage;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_tron);
 
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
@@ -28,10 +22,6 @@ public class MainActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-
-        Animation startAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blinking);
-        startImage = (ImageView) findViewById(R.id.start);
-        startImage.startAnimation(startAnimation);
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -50,26 +40,5 @@ public class MainActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
-    }
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int y = (int) event.getY();
-        int height = getScreenHeight();
-
-        if (y >= height * 0.66){
-            Intent intent = new Intent(this, GameMenuActivity.class);
-            startActivity(intent);
-            System.out.println("is in main activity");
-        }
-        return super.onTouchEvent(event);
     }
 }

@@ -8,11 +8,9 @@
 
     <ImageView
         android:id="@+id/pong_back"
-        android:layout_width="576dp"
-        android:layout_height="343dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/pong_back"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp" />
+        app:srcCompat="@drawable/pong_back" />
 
 </android.support.constraint.ConstraintLayout>

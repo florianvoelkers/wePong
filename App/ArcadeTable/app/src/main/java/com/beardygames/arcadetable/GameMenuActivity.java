@@ -47,9 +47,9 @@ public class GameMenuActivity extends AppCompatActivity {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int x = (int) event.getX();
-        int width = MainActivity.getScreenWidth();
+        int width = DataHandler.getScreenWidth();
         int y = (int) event.getY();
-        int height = MainActivity.getScreenHeight();
+        int height = DataHandler.getScreenHeight();
 
         if (y >= height * 0.66 && x <= width * 0.5){
             Intent intent = new Intent(this, PongActivity.class);

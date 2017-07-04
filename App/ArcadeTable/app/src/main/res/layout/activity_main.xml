@@ -20,4 +20,25 @@
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/start" />
 
+    <ImageView
+        android:id="@+id/player_one"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/player_one" />
+
+    <ImageView
+        android:id="@+id/player_two"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/player_two" />
+
+    <ImageView
+        android:id="@+id/seperator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/seperator" />
+
 </android.support.constraint.ConstraintLayout>

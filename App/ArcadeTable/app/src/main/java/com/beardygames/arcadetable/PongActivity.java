@@ -19,8 +19,6 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     private double pitch;
 
     private View decorView;
-    private ImageView playerOne;
-    private ImageView playerTwo;
     private boolean touchReady;
 
     @Override
@@ -38,9 +36,6 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-
-        playerOne = (ImageView) findViewById(R.id.player_one);
-        playerTwo = (ImageView) findViewById(R.id.player_two);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
@@ -86,18 +81,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (touchReady) {
-            int x = (int) event.getX();
-            int width = MainActivity.getScreenWidth();
 
-            if (x >= width * 0.5) {
-                playerOne.setVisibility(View.INVISIBLE);
-                touchReady = false;
-            } else {
-                playerTwo.setVisibility(View.INVISIBLE);
-                touchReady = false;
-            }
-        }
 
         return super.onTouchEvent(event);
     }

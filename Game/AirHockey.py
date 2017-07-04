@@ -11,19 +11,21 @@ import os
 
 # Spielgeschwindigkeit
 FPS = 60
-INCREASESPEED = 5
 
 # Fenster breite und hoehe
 WINDOWWIDTH = 1824
 WINDOWHEIGHT = 984
 
-LINETHICKNESS = 8
+LINETHICKNESS = 20
 
 # Farben vor definieren
 WHITE = [255, 255, 255]
 RED = [198,61,61]
 BLUE = [52, 190, 196]
 GREEN = [0, 255, 0]
+
+MAXSPEED = 20
+DECREASESPEED = 0.06
 
 
 # Arena zeichnen
@@ -40,13 +42,13 @@ def drawArena(init):
     leftEdge = pygame.draw.rect(SCREEN, RED, (0, 0, LINETHICKNESS,WINDOWWIDTH))
     rightEdge = pygame.draw.rect(SCREEN, RED, (WINDOWWIDTH-LINETHICKNESS, 0, LINETHICKNESS,WINDOWWIDTH))
 
-    leftGoalOutline = pygame.draw.ellipse(SCREEN, RED, (-100, WINDOWHEIGHT/2-120, 200,240))
-    leftGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (-110, WINDOWHEIGHT/2-110, 200,220))
-    leftGoal = pygame.draw.rect(SCREEN, WHITE, (0, WINDOWHEIGHT/2-110, LINETHICKNESS,220))
+    leftGoalOutline = pygame.draw.ellipse(SCREEN, RED, (-90, WINDOWHEIGHT/2-120, 200,240))
+    leftGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (-100, WINDOWHEIGHT/2-110, 200,220))
+    leftGoal = pygame.draw.rect(SCREEN, WHITE, (0, WINDOWHEIGHT/2-109, LINETHICKNESS,218))
 
-    rightGoalOutline = pygame.draw.ellipse(SCREEN, RED, (WINDOWWIDTH-100, WINDOWHEIGHT/2-120, 200,240))
-    rightGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (WINDOWWIDTH-90, WINDOWHEIGHT/2-110, 200,220))
-    rightGoal = pygame.draw.rect(SCREEN, WHITE, (WINDOWWIDTH-LINETHICKNESS, WINDOWHEIGHT/2-110, LINETHICKNESS,220))
+    rightGoalOutline = pygame.draw.ellipse(SCREEN, RED, (WINDOWWIDTH-110, WINDOWHEIGHT/2-120, 200,240))
+    rightGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (WINDOWWIDTH-100, WINDOWHEIGHT/2-110, 200,220))
+    rightGoal = pygame.draw.rect(SCREEN, WHITE, (WINDOWWIDTH-LINETHICKNESS, WINDOWHEIGHT/2-109, LINETHICKNESS,218))
     if init:
         return lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal
 
@@ -65,18 +67,60 @@ def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, 
 
     return puckDirY,puckDirX
 
+def checkBatCollision(puck, puckDirY, puckDirX, bat):
+    if puck.colliderect(bat) and bat.colliderect(puck):
+        if puck.centerx < bat.centerx and puck.centery < bat.centery: # puck ist links oben vom schlaeger
+            distanceX = bat.centerx - puck.centerx
+            distanceY = bat.centery - puck.centery
+            distanceSum = distanceX + distanceY
+            puckDirY = - MAXSPEED * (distanceY/distanceSum)
+            puckDirX = - MAXSPEED * (distanceX/distanceSum)
+
+        elif puck.centerx > bat.centerx and puck.centery < bat.centery: # puck ist rechts oben vom schlaeger
+            distanceX = puck.centerx - bat.centerx 
+            distanceY = bat.centery - puck.centery
+            distanceSum = distanceX + distanceY
+            puckDirY = - MAXSPEED * (distanceY/distanceSum)
+            puckDirX = MAXSPEED * (distanceX/distanceSum)
+
+        elif puck.centerx < bat.centerx and puck.centery > bat.centery: # puck ist links unten vom schlaeger
+            distanceX = bat.centerx - puck.centerx
+            distanceY = puck.centery -bat.centery
+            distanceSum = distanceX + distanceY
+            puckDirY = MAXSPEED * (distanceY/distanceSum)
+            puckDirX = - MAXSPEED * (distanceX/distanceSum)
+
+        elif puck.centerx > bat.centerx and puck.centery > bat.centery: # puck ist rechts unten vom schlaeger
+            distanceX = puck.centerx - bat.centerx
+            distanceY = puck.centery - bat.centery
+            distanceSum = distanceX + distanceY
+            puckDirY = MAXSPEED * (distanceY/distanceSum)
+            puckDirX = MAXSPEED * (distanceX/distanceSum)
+
+    return puckDirY, puckDirX
+
 def drawPuck(puck):
     newPuck = SCREEN.blit(PUCKIMAGE, (puck.x,puck.y))
     return newPuck
 
 def movePuck(puck, puckDirX, puckDirY):
-    puck.x += (puckDirX * INCREASESPEED)
-    puck.y += (puckDirY * INCREASESPEED)
-    return puck
+    puck.x += puckDirX
+    puck.y += puckDirY
+    print(puckDirX,puckDirY)
+    if puckDirY > 0:
+        newDirY = puckDirY - DECREASESPEED
+    elif puckDirY < 0:
+        newDirY = puckDirY + DECREASESPEED
+    if puckDirX > 0:
+        newDirX = puckDirX - DECREASESPEED
+    elif puckDirX < 0:
+        newDirX = puckDirX + DECREASESPEED
+    return puck ,newDirX, newDirY
 
 def drawBat(batX,batY):
     batDiameter = BATIMAGE.get_height() / 2
-    SCREEN.blit(BATIMAGE, (batX-batDiameter,batY-batDiameter))
+    bat = SCREEN.blit(BATIMAGE, (batX-batDiameter,batY-batDiameter))
+    return bat
 
 def main():
     pygame.init()
@@ -100,14 +144,13 @@ def main():
     BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
     puckDiameter = PUCKIMAGE.get_height() / 2
     puck = SCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
-
-    #BATMASK = pygame.mask.from_surface(BATIMAGE,127)
-    #sprite.mask = pygame.mask.from_surface(sprite.image)
+    bat1 = drawBat(100, WINDOWHEIGHT/2)
+    bat2 = drawBat(WINDOWWIDTH-100, WINDOWHEIGHT/2)
 
     # Zufaellige Startrichtung des Pucks
     ramdomDir = random.sample([-1, 1],k=2)
-    puckDirX = 1.5 #ramdomDir[0]  # -1 = links 1 = rechts
-    puckDirY = -1 #ramdomDir[1] # -1 = hoch 1 = runter
+    puckDirX = ramdomDir[0] * MAXSPEED/2  # -1 = links 1 = rechts
+    puckDirY = ramdomDir[1] * MAXSPEED/2  # -1 = hoch 1 = runter
 
     # get arena values
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
@@ -127,12 +170,14 @@ def main():
 
         drawArena(False)
         drawPuck(puck)
-        drawBat(100, WINDOWHEIGHT/2)
-        drawBat(WINDOWWIDTH-100, WINDOWHEIGHT/2)
+        bat1 = drawBat(500, WINDOWHEIGHT/2)
+        bat2 = drawBat(WINDOWWIDTH-500, WINDOWHEIGHT/2)
 
-        puck = movePuck(puck, puckDirX, puckDirY)
+
+        puck, puckDirX, puckDirY = movePuck(puck, puckDirX, puckDirY)
         puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal)
-        
+        puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat1)
+        puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat2)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

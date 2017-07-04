@@ -39,7 +39,6 @@ RIGHTPADDLESPEED = 0
 GAMESTART = True
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
-COUNTER = 10
 
 
 # Arena zeichnen
@@ -50,6 +49,7 @@ def drawArena():
     # Rand oben und unten
     upperEdge = pygame.draw.rect(SCREEN, GREEN, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
     lowerEdge = pygame.draw.rect(SCREEN, GREEN, (0, 0, WINDOWWIDTH, LINETHICKNESS))
+    return lowerEdge, upperEdge
 
 # Schlaeger zeichnen
 def drawPaddle(paddle):
@@ -73,19 +73,17 @@ def moveBall(ball,ballDirX, ballDirY):
     return ball
 
 # Ueberpruefen ob der Ball mit dem oberen oder unteren Rand kollidiert, wenn ja dann wird die Ball richtung veraendert
-def checkEdgeCollision(ball, ballDirY):
-    global COUNTER
-    if ball.top < (LINETHICKNESS*4) or ball.bottom > (WINDOWHEIGHT+LINETHICKNESS*4):
-        COUNTER -= 1
-        if COUNTER <= 0:
-            COUNTER = 2
-            ballDirY = ballDirY * -1
+def checkEdgeCollision(ball, ballDirY, lowerEdge, upperEdge):
+    if ballDirY > 0  and ball.colliderect(upperEdge) and upperEdge.colliderect(ball):
+        ballDirY = ballDirY * -1
+    elif ballDirY < 0  and ball.colliderect(lowerEdge) and lowerEdge.colliderect(ball):
+        ballDirY = ballDirY * -1
     return ballDirY
 
 # Ueberprueft ob der Ball mit einem Schlaeger kollidiert wenn ja dann wird die Richtung  der Flugbahn veraendert
 def checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY):
     #print (ball.center,ball.top,ball.bottom,ball.left,ball.right,ball.x,ball.y)
-    if ballDirX < 0  and paddle1.right >= ball.left and paddle1.top <= ball.centery and paddle1.bottom >= ball.centery and ball.centerx >= paddle1.right :
+    if ballDirX < 0  and ball.colliderect(paddle1) and paddle1.colliderect(ball):
         contactpoint = paddle1.top - ball.centery
         percent =(contactpoint / PADDLESIZE) +1
         if percent > 0.8:
@@ -99,7 +97,7 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY):
         else:
             newXDir, newYDir = 0.5, 1.5
         return newXDir, newYDir            
-    elif ballDirX > 0 and paddle2.left + LINETHICKNESS*2 <= ball.right and paddle2.top <= ball.centery and paddle2.bottom >= ball.centery and ball.centerx <= paddle2.left:
+    elif ballDirX > 0 and ball.colliderect(paddle2) and paddle2.colliderect(ball):
         contactpoint = paddle2.top - ball.centery
         percent =(contactpoint / PADDLESIZE) +1
         if percent > 0.8:
@@ -311,13 +309,13 @@ def main():#connection1,connection2):
             #Steuerung rechter Schlaeger mit Handydaten
             paddle2.y = paddle2.y + RIGHTPADDLESPEED
 
-            drawArena()
+            lowerEdge, upperEdge = drawArena()
             drawPaddle(paddle1)
             drawPaddle(paddle2)
             drawBall(ball.x,ball.y)
 
             ball = moveBall(ball, ballDirX, ballDirY)
-            ballDirY = checkEdgeCollision(ball, ballDirY)
+            ballDirY = checkEdgeCollision(ball, ballDirY,lowerEdge, upperEdge)
             ballDirX, ballDirY = checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY)
             score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
             score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)

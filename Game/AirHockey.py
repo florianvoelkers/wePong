@@ -11,7 +11,7 @@ import os
 
 # Spielgeschwindigkeit
 FPS = 60
-
+INCREASESPEED = 5
 
 # Fenster breite und hoehe
 WINDOWWIDTH = 1824
@@ -28,8 +28,6 @@ GREEN = [0, 255, 0]
 
 # Arena zeichnen
 def drawArena():
-
-    
     SCREEN.fill(BLUE)
     
     # Rand oben und unten
@@ -51,10 +49,30 @@ def drawArena():
     rightGoal = pygame.draw.rect(SCREEN, WHITE, (WINDOWWIDTH-LINETHICKNESS, WINDOWHEIGHT/2-110, LINETHICKNESS,220))
     return lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal
 
+def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal):
+    print ("upperedge",puck.colliderect(upperEdge))
+    print ("loweredge",puck.colliderect(lowerEdge) )
+    if puckDirY > 0  and puck.colliderect(upperEdge) and upperEdge.colliderect(puck):
+        puckDirY = puckDirY * -1
+    elif puckDirY < 0  and puck.colliderect(lowerEdge) and lowerEdge.colliderect(puck):
+        puckDirY = puckDirY * -1
+
+    if puckDirX > 0  and puck.colliderect(rightEdge) and rightEdge.colliderect(puck) and not puck.colliderect(rightGoal) and not rightGoal.colliderect(puck):
+        puckDirX = puckDirX * -1
+    elif puckDirX < 0  and puck.colliderect(leftEdge) and leftEdge.colliderect(puck) and not puck.colliderect(leftGoal) and not leftGoal.colliderect(puck):
+        puckDirX = puckDirX * -1
+
+    return puckDirY,puckDirX
+
 def drawPuck(puck):
     puckDiameter = PUCKIMAGE.get_height() / 2
     newPuck = SCREEN.blit(PUCKIMAGE, (puck.x-puckDiameter,puck.y-puckDiameter))
     return newPuck
+
+def movePuck(puck, puckDirX, puckDirY):
+    puck.x += (puckDirX * INCREASESPEED)
+    puck.y += (puckDirY * INCREASESPEED)
+    return puck
 
 def drawBat(batX,batY):
     batDiameter = BATIMAGE.get_height() / 2
@@ -66,19 +84,30 @@ def main():
     global SCREEN
     global PUCKIMAGE
     global BATIMAGE
+    global BATMASK
+
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
-    
+
+    FPSCLOCK = pygame.time.Clock()
+
     # automatischer pfad auf dem Pi funktioniert unter windows nicht
     #PUCKIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"puck.png"))
     #BATIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"SchlaegerRot.png"))
 
     PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
     BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
-    FPSCLOCK = pygame.time.Clock()
-
     puck = SCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)))
+    
+
+    #BATMASK = pygame.mask.from_surface(BATIMAGE,127)
+    #sprite.mask = pygame.mask.from_surface(sprite.image)
+
+    # Zufaellige Startrichtung des Pucks
+    ramdomDir = random.sample([-1, 1],k=2)
+    puckDirX = 1.5 #ramdomDir[0]  # -1 = links 1 = rechts
+    puckDirY = -1 #ramdomDir[1] # -1 = hoch 1 = runter
 
     while True:
 
@@ -98,6 +127,10 @@ def main():
         drawPuck(puck)
         drawBat(100, WINDOWHEIGHT/2)
         drawBat(WINDOWWIDTH-100, WINDOWHEIGHT/2)
+
+        puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal)
+        puck = movePuck(puck, puckDirX, puckDirY)
+
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 

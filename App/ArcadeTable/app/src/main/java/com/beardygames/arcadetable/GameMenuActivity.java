@@ -10,11 +10,14 @@ import android.view.View;
 public class GameMenuActivity extends AppCompatActivity {
 
     private View decorView;
+    private boolean touchReady;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_menu);
+
+        touchReady = true;
 
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
@@ -46,22 +49,25 @@ public class GameMenuActivity extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int x = (int) event.getX();
-        int width = DataHandler.getScreenWidth();
-        int y = (int) event.getY();
-        int height = DataHandler.getScreenHeight();
+        if (touchReady) {
+            int x = (int) event.getX();
+            int width = DataHandler.getScreenWidth();
+            int y = (int) event.getY();
+            int height = DataHandler.getScreenHeight();
 
-        if (y >= height * 0.66 && x <= width * 0.5){
-            Intent intent = new Intent(this, PongActivity.class);
-            startActivity(intent);
-        }
-        else if (y >= height * 0.66 && x >= width * 0.5){
-            Intent intent = new Intent(this, AirHockeyActivity.class);
-            startActivity(intent);
-        }
-        else if (y <= height * 0.33){
-            Intent intent = new Intent(this, TronActivity.class);
-            startActivity(intent);
+            if (y >= height * 0.66 && x <= width * 0.5) {
+                touchReady = false;
+                Intent intent = new Intent(this, PongActivity.class);
+                startActivity(intent);
+            } else if (y >= height * 0.66 && x >= width * 0.5) {
+                touchReady = false;
+                Intent intent = new Intent(this, AirHockeyActivity.class);
+                startActivity(intent);
+            } else if (y <= height * 0.33) {
+                touchReady = false;
+                Intent intent = new Intent(this, TronActivity.class);
+                startActivity(intent);
+            }
         }
 
         return super.onTouchEvent(event);

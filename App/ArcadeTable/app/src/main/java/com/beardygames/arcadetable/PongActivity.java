@@ -8,9 +8,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 
 public class PongActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -18,15 +16,19 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     private Sensor rotationSensor;
     private double pitch;
 
+    private boolean playerLeft;
+
+    private SendDataThread dataThread;
+
     private View decorView;
-    private boolean touchReady;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pong);
 
-        touchReady = true;
+        DataHandler.setGameRunning(true);
+        playerLeft = DataHandler.getPlayerLeft();
 
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
@@ -41,6 +43,8 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         pitch = 0;
 
+        dataThread = new SendDataThread();
+        dataThread.start();
     }
 
     @Override
@@ -54,6 +58,13 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             pitch = orientationAngles[1] * 360 / (2 * Math.PI);
+
+            int speed = (int) (pitch / 10);
+            if (!playerLeft){
+                speed *= -1;
+            }
+            String data = "speed:" + speed;
+            dataThread.setData(data);
         }
     }
 
@@ -80,13 +91,6 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-
-
-        return super.onTouchEvent(event);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         mSensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
@@ -97,4 +101,5 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         super.onPause();
         mSensorManager.unregisterListener(this);
     }
+
 }

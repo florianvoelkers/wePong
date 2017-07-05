@@ -1,6 +1,8 @@
 package com.beardygames.arcadetable;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         /*try {
             InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
             socket = new Socket(serverAddr, SERVERPORT);
+            DataHandler.setSocket(socket);
         } catch (UnknownHostException e1) {
             e1.printStackTrace();
         } catch (IOException e1) {
@@ -130,17 +133,28 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 if (y >= height * 0.66) {
+                    seperator.setVisibility(View.INVISIBLE);
                     if (x <= width * 0.5) {
+                        playerTwo.setVisibility(View.INVISIBLE);
                         //sendMessage("player1");
                         System.out.println("player1");
                         DataHandler.setPlayerLeft(true);
                     } else {
+                        playerOne.setVisibility(View.INVISIBLE);
                         //sendMessage("player2");
                         System.out.println("player2");
                         DataHandler.setPlayerLeft(false);
                     }
-                    Intent intent = new Intent(this, GameMenuActivity.class);
-                    startActivity(intent);
+
+                    final Context ctx  = this;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(ctx, GameMenuActivity.class);
+                            startActivity(intent);
+                        }
+                    }, 2000);
+
                 }
             }
         }

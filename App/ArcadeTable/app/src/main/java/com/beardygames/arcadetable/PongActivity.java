@@ -31,9 +31,8 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
+
         DataHandler.setGameRunning(true);
         playerLeft = DataHandler.getPlayerLeft();
 

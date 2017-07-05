@@ -27,6 +27,11 @@ GREEN = [0, 255, 0]
 MAXSPEED = 20
 DECREASESPEED = 0.06
 
+GAMESTART = False
+
+LEFTBATPOSITION = 100 + 35, WINDOWHEIGHT/2 -35
+RIGHTBATPOSITION =WINDOWWIDTH-100 - 35, WINDOWHEIGHT/2 -35
+
 
 # Arena zeichnen
 def drawArena(init):
@@ -117,10 +122,84 @@ def movePuck(puck, puckDirX, puckDirY):
         newDirX = puckDirX + DECREASESPEED
     return puck ,newDirX, newDirY
 
-def drawBat(batX,batY):
-    batDiameter = BATIMAGE.get_height() / 2
-    bat = SCREEN.blit(BATIMAGE, (batX-batDiameter,batY-batDiameter))
+def drawBat(player1):
+    if player1:
+        bat = SCREEN.blit(BATIMAGE, LEFTBATPOSITION)
+    else:
+        bat = SCREEN.blit(BATIMAGE, RIGHTBATPOSITION)
     return bat
+
+
+# Anzeige des Spieler Scores
+def displayScore(player, score):
+    if score > 10:
+        Menu.main()
+        pygame.quit()
+    if player: 
+        postion = 150 
+    else:
+        postion = WINDOWWIDTH - 150 
+
+    resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
+    resultRect = resultSurf.get_rect()
+    resultRect.topleft = (postion, 25)
+    SCREEN.blit(resultSurf, resultRect)
+
+
+
+# Thread um die gesendeten Daten der Spielers auszuwerten
+def playerThread(connection):
+    playerConnection = connection
+    global RIGHTPADDLESPEED
+    global LEFTPADDLESPEED
+    global LEFTPLAYERCONNECTED
+    global RIGHTPLAYERCONNECTED
+
+    data = playerConnection.recv(1024)
+    player = data
+    print ("player",player)
+    if player == "player1":
+        LEFTPLAYERCONNECTED = True
+    elif player == "player2":
+        RIGHTPLAYERCONNECTED = True
+
+    while True:
+        data = playerConnection.recv(1024)
+        if data.count(":") == 1:
+            x,y = data.split (":")
+            if player == "player1":
+                LEFTBATPOSITION = x * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * y
+            elif player == "player2":
+                RIGHTBATPOSITION = x * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * y
+
+
+
+def serverThread():
+    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
+    # fuer die jeweiligen Spieler startet
+    global GAMESTART
+    global LEFTPLAYERCONNECTED
+    global RIGHTPLAYERCONNECTED
+    print("ServerThread startet")
+
+    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = ""
+    port=5000
+    gameSocket.bind((host,port))
+    gameSocket.listen(5)
+    print("socket hoert zu")
+    playerCount = 0
+    while playerCount < 2:
+        print ("waiting for", 2-playerCount ,"connection(s)")
+        connection,address = gameSocket.accept()
+        print ("got connection",address)
+        playerCount+= 1
+        threading.Thread(target=playerThread, args=(connection,)).start()
+    while True:
+        if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
+            print ("gamestart = true und break der whileschleife")
+            GAMESTART = True
+            break
 
 def main():
     pygame.init()
@@ -136,6 +215,14 @@ def main():
 
     FPSCLOCK = pygame.time.Clock()
 
+    # Einstellungen der Schriftart
+    global BASICFONT, BASICFONTSIZE
+    BASICFONTSIZE = 20
+    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
+    score1 = 0
+    score2 = 0
+
     # automatischer pfad auf dem Pi funktioniert unter windows nicht
     #PUCKIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"puck.png"))
     #BATIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"SchlaegerRot.png"))
@@ -144,8 +231,9 @@ def main():
     BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
     puckDiameter = PUCKIMAGE.get_height() / 2
     puck = SCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
-    bat1 = drawBat(100, WINDOWHEIGHT/2)
-    bat2 = drawBat(WINDOWWIDTH-100, WINDOWHEIGHT/2)
+    batDiameter = BATIMAGE.get_height() / 2
+    bat1 = drawBat(True)
+    bat2 = drawBat(False)
 
     # Zufaellige Startrichtung des Pucks
     ramdomDir = random.sample([-1, 1],k=2)
@@ -154,6 +242,9 @@ def main():
 
     # get arena values
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
+
+    threading.Thread(target=serverThread, args=()).start()
+
     while True:
 
         # Auslesen von Tastatur eingaben
@@ -170,14 +261,17 @@ def main():
 
         drawArena(False)
         drawPuck(puck)
-        bat1 = drawBat(500, WINDOWHEIGHT/2)
-        bat2 = drawBat(WINDOWWIDTH-500, WINDOWHEIGHT/2)
+        bat1 = drawBat(True)
+        bat2 = drawBat(False)
 
 
         puck, puckDirX, puckDirY = movePuck(puck, puckDirX, puckDirY)
         puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal)
         puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat1)
         puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat2)
+
+        displayScore(True,score1)
+        displayScore(False,score2)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

@@ -8,7 +8,7 @@ import threading
 import subprocess
 import os
 import inspect
-import WePong
+#import WePong
 
 
 # Spielgeschwindigkeit
@@ -117,6 +117,10 @@ def main():
     # ServerThread starten
     threading.Thread(target=serverThread, args=()).start()
 
+    backgroundImage = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","backGround.png"))
+    resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
+    background = SCREEN.blit(resizedImage, (0 , 0))
+
     while True:
 
         # Auslesen von Tastatur eingaben
@@ -135,10 +139,7 @@ def main():
                 pygame.quit()
                 sys.exit()
         else:
-        	resultSurf = BASICFONT.render("Choose a Game\nwePong\tweTron\tweAirHockey", True, WHITE)
-        	resultRect = resultSurf.get_rect()
-        	resultRect.topleft = (WINDOWWIDTH/3, 25)
-        	SCREEN.blit(resultSurf, resultRect)
+        	
         	pygame.display.update()
         	FPSCLOCK.tick(FPS)
 

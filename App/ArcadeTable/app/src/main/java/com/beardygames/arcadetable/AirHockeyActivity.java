@@ -46,7 +46,7 @@ public class AirHockeyActivity extends AppCompatActivity {
         width = DataHandler.getScreenWidth();
         height = DataHandler.getScreenHeight();
 
-        dataThread = new SendDataThread();
+        dataThread = new SendDataThread(false);
         dataThread.start();
     }
 

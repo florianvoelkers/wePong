@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.beardygames.arcadetable.MainActivity">
+    tools:context="com.beardygames.arcadetable.AirHockeyActivity">
 
     <ImageView
-        android:id="@+id/pong_back"
+        android:id="@+id/hockey_back"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"

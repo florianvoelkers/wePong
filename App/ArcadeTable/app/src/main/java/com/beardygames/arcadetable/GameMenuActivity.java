@@ -1,7 +1,9 @@
 package com.beardygames.arcadetable;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -11,6 +13,7 @@ public class GameMenuActivity extends AppCompatActivity {
 
     private View decorView;
     private boolean touchReady;
+    private SendDataThread dataThread;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,6 +30,9 @@ public class GameMenuActivity extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
+
+        dataThread = new SendDataThread(true);
+        dataThread.start();
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -47,6 +53,29 @@ public class GameMenuActivity extends AppCompatActivity {
         }
     }
 
+    private void selectGame(String game){
+        final Intent intent;
+        touchReady = false;
+        if (game.equals("pong")){
+            intent = new Intent(this, PongActivity.class);
+        }
+        else if (game.equals("air")){
+            intent = new Intent(this, AirHockeyActivity.class);
+        }
+        else{
+            intent = new Intent(this, TronActivity.class);
+        }
+        dataThread.setData("game:" + game);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(intent);
+                dataThread.interrupt();
+            }
+        }, 1000);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (touchReady) {
@@ -56,17 +85,11 @@ public class GameMenuActivity extends AppCompatActivity {
             int height = DataHandler.getScreenHeight();
 
             if (y >= height * 0.66 && x <= width * 0.5) {
-                touchReady = false;
-                Intent intent = new Intent(this, PongActivity.class);
-                startActivity(intent);
+                selectGame("pong");
             } else if (y >= height * 0.66 && x >= width * 0.5) {
-                touchReady = false;
-                Intent intent = new Intent(this, AirHockeyActivity.class);
-                startActivity(intent);
+                selectGame("air");
             } else if (y <= height * 0.33) {
-                touchReady = false;
-                Intent intent = new Intent(this, TronActivity.class);
-                startActivity(intent);
+                selectGame("tron");
             }
         }
 

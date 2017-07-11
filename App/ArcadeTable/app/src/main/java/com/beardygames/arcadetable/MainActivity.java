@@ -15,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -29,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean startPressed;
     private boolean readyForNewEvent;
 
-    private Socket socket;
+    //private SendDataThread dataThread;
 
-    private static final int SERVERPORT = 5000;
-    private static final String SERVER_IP = "192.168.0.1";
+    private boolean playerSet;
+    private String player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         startPressed = false;
+        playerSet = false;
 
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
@@ -61,15 +63,7 @@ public class MainActivity extends AppCompatActivity {
         blinking = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blinking);
         startImage.startAnimation(blinking);
 
-        /*try {
-            InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
-            socket = new Socket(serverAddr, SERVERPORT);
-            DataHandler.setSocket(socket);
-        } catch (UnknownHostException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }*/
+        //dataThread = new SendDataThread(true);
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -90,24 +84,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //Function to send the player to the server
-    private void sendMessage(String str){
-        try {
-            PrintWriter out = new PrintWriter(new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream())),
-                    true);
-            out.print(str);
-            out.flush();
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int x = (int) event.getX();
@@ -115,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         int width = DataHandler.getScreenWidth();
         int height = DataHandler.getScreenHeight();
 
-        if (event.getActionMasked() == MotionEvent.ACTION_UP){
+        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
             readyForNewEvent = true;
         }
 
@@ -130,23 +106,26 @@ public class MainActivity extends AppCompatActivity {
                     playerOne.setVisibility(View.VISIBLE);
                     playerTwo.setVisibility(View.VISIBLE);
                     seperator.setVisibility(View.VISIBLE);
+                    new Thread(new ClientThread()).start();
                 }
             } else {
                 if (y >= height * 0.66) {
                     seperator.setVisibility(View.INVISIBLE);
                     if (x <= width * 0.5) {
                         playerTwo.setVisibility(View.INVISIBLE);
-                        //sendMessage("player1");
+                        player = "player1";
+                        playerSet = true;
                         System.out.println("player1");
                         DataHandler.setPlayerLeft(true);
                     } else {
                         playerOne.setVisibility(View.INVISIBLE);
-                        //sendMessage("player2");
+                        player = "player2";
+                        playerSet = true;
                         System.out.println("player2");
                         DataHandler.setPlayerLeft(false);
                     }
 
-                    final Context ctx  = this;
+                    final Context ctx = this;
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -159,5 +138,53 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    class ClientThread implements Runnable{
+
+        private Socket socket;
+
+        private static final int SERVERPORT = 5000;
+        private static final String SERVER_IP = "192.168.0.1";
+
+        private volatile boolean waitForData = true;
+
+        @Override
+        public void run() {
+            try {
+                InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
+                socket = new Socket(serverAddr, SERVERPORT);
+                DataHandler.setSocket(socket);
+
+                //dataThread.start();
+
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
+            while(waitForData) {
+                if (playerSet) {
+                    waitForData = false;
+                    System.out.println("player set");
+                    try {
+                        System.out.println("this is data before: " + player);
+                        PrintWriter out = new PrintWriter(new BufferedWriter(
+                                new OutputStreamWriter(socket.getOutputStream())),
+                                true);
+
+                        System.out.println("this is data: " + player);
+
+                        out.print(player);
+                        out.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("not set");
+                }
+            }
+        }
     }
 }

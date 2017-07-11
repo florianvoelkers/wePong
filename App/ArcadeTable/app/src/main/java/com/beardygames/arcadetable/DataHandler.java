@@ -20,6 +20,7 @@ public class DataHandler {
     }
 
     public static void setSocket(Socket socket){
+        System.out.println("socket set");
         serverSocket = socket;
     }
 

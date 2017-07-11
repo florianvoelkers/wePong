@@ -159,20 +159,17 @@ def displayScore(player, score):
 
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
-def playerThread(connection):
+def playerThread(connection,playerSide):
     playerConnection = connection
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
 
-    data = playerConnection.recv(1024)
-    player = data
-    print ("player",player)
-    if player == "player1":
-        LEFTPLAYERCONNECTED = True
-    elif player == "player2":
+    if playerSide:
         RIGHTPLAYERCONNECTED = True
+    else playerSide:
+        LEFTPLAYERCONNECTED = True
 
     while True:
         data = playerConnection.recv(1024)
@@ -214,7 +211,7 @@ def serverThread():
             GAMESTART = True
             break
 
-def main():#connection1,connection2):
+def main(connection1,connection2):
     pygame.init()
 
     global SCREEN
@@ -268,10 +265,10 @@ def main():#connection1,connection2):
     drawPaddle(paddle2)
     drawBall(ballX,ballY)
     
-    #threading.Thread(target=playerThread, args=(connection1,)).start()
-    #threading.Thread(target=playerThread, args=(connection2,)).start()
+    threading.Thread(target=playerThread, args=(connection1,true)).start()
+    threading.Thread(target=playerThread, args=(connection2,false)).start()
 
-    threading.Thread(target=serverThread, args=()).start()
+    #threading.Thread(target=serverThread, args=()).start()
 
 
 

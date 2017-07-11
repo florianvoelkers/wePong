@@ -8,7 +8,8 @@ import threading
 import subprocess
 import os
 import inspect
-#import WePong
+import WePong
+import AirHockey
 
 
 # Spielgeschwindigkeit
@@ -31,14 +32,6 @@ GAMESTART = False
 PLAYER1CONNECTION = 0
 PLAYER1CONNECTION = 0
 
-def get_script_dir(follow_symlinks=True):
-    if getattr(sys, 'frozen', False): 
-        path = os.path.abspath(sys.executable)
-    else:
-        path = inspect.getabsfile(get_script_dir)
-    if follow_symlinks:
-        path = os.path.realpath(path)
-    return os.path.dirname(path)
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection):
@@ -65,9 +58,17 @@ def playerThread(connection):
             
             print (player, game)
             if player == "player1" and GAMESTART:
-                WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
-                pygame.quit()
-                print("Start a game")
+                if game == "tron":
+                    print ("starte Tron")
+                elif game == "air":
+                    AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                    print("Starte airhockey")
+                    pygame.quit()
+                elif game == "hockey":
+                    WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                    print("Starte wepong")
+                    pygame.quit()
+                    
 
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads

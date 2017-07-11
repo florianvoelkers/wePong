@@ -6,7 +6,7 @@ import random
 import socket
 import threading
 import os
-#import Menu
+import Menu
 
 
 # Spielgeschwindigkeit
@@ -234,16 +234,16 @@ def playerThread(connection,playerSide):
 
     if playerSide:
         RIGHTPLAYERCONNECTED = True
-    else playerSide:
+    else:
         LEFTPLAYERCONNECTED = True
 
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             x,y = data.split (":")
-            if player == "player1":
+            if playerSide:
                 LEFTBATPOSITION = x * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * y
-            elif player == "player2":
+            else:
                 RIGHTBATPOSITION = x * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * y
         if GAMEEND:
             playerConnection.send("end")
@@ -301,11 +301,11 @@ def main(connection1,connection2):
     score2 = 0
 
     # automatischer pfad auf dem Pi funktioniert unter windows nicht
-    #PUCKIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"puck.png"))
-    #BATIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"SchlaegerRot.png"))
+    PUCKIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"puck.png"))
+    BATIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"SchlaegerRot.png"))
 
-    PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
-    BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
+    #PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
+    #BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
     puckDiameter = PUCKIMAGE.get_height() / 2
     puck = SCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
     bat1 = drawBat(True)
@@ -319,8 +319,8 @@ def main(connection1,connection2):
     # get arena values
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
 
-    threading.Thread(target=playerThread, args=(connection1,true)).start()
-    threading.Thread(target=playerThread, args=(connection2,false)).start()
+    threading.Thread(target=playerThread, args=(connection1,True)).start()
+    threading.Thread(target=playerThread, args=(connection2,False)).start()
 
     #threading.Thread(target=serverThread, args=()).start()
 

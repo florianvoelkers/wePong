@@ -64,7 +64,7 @@ def playerThread(connection):
                     AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte airhockey")
                     pygame.quit()
-                elif game == "hockey":
+                elif game == "pong":
                     WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte wepong")
                     pygame.quit()
@@ -118,7 +118,7 @@ def main():
     # ServerThread starten
     threading.Thread(target=serverThread, args=()).start()
 
-    backgroundImage = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","backGround.png"))
+    backgroundImage = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","backGround.png"))
     resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
     background = SCREEN.blit(resizedImage, (0 , 0))
 

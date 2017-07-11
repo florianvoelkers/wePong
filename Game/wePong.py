@@ -5,7 +5,7 @@ from pygame.locals import *
 import random
 import socket
 import threading
-#import Menu
+import Menu
 
 
 # Spielgeschwindigkeit
@@ -36,7 +36,7 @@ PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 LEFTPADDLESPEED = 0
 RIGHTPADDLESPEED = 0
 GAMEEND = False
-GAMESTART = True
+GAMESTART = False
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
 
@@ -169,7 +169,7 @@ def countdown():
 
     while GAMESTART == False: 
         seconds=(pygame.time.get_ticks()-start_ticks)/1000 
-        drawArena(False)
+        drawArena()
         if seconds>3:
             GAMESTART = True
         elif seconds > 2:
@@ -185,6 +185,7 @@ def countdown():
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
         pygame.display.update()
+        print(seconds)
 
 
 # Anzeige des Spieler Scores
@@ -214,7 +215,7 @@ def playerThread(connection,playerSide):
 
     if playerSide:
         RIGHTPLAYERCONNECTED = True
-    else playerSide:
+    else:
         LEFTPLAYERCONNECTED = True
 
     while True:
@@ -222,11 +223,9 @@ def playerThread(connection,playerSide):
         if data.count(":") == 1:
             name, speed = data.split (":")
             newSpeed = int(speed) * 2
-            print (player, newSpeed)
-            if player == "player1":
+            if playerSide:
                 LEFTPADDLESPEED = int(newSpeed)
-
-            elif player == "player2":
+            else:
                 RIGHTPADDLESPEED = int(newSpeed)
         if GAMEEND:
             playerConnection.send("end")
@@ -317,8 +316,8 @@ def main(connection1,connection2):
     drawPaddle(paddle2)
     drawBall(ballX,ballY)
     
-    threading.Thread(target=playerThread, args=(connection1,true)).start()
-    threading.Thread(target=playerThread, args=(connection2,false)).start()
+    threading.Thread(target=playerThread, args=(connection1,True)).start()
+    threading.Thread(target=playerThread, args=(connection2,False)).start()
 
     #threading.Thread(target=serverThread, args=()).start()
 

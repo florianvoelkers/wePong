@@ -59,7 +59,16 @@ def drawArena(init):
     if init:
         return lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal
 
-def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal):
+def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal, score1, score2):
+
+    def resetPuck ():
+        puckDiameter = puck.height / 2
+        puck.x = int(WINDOWWIDTH/2) - puckDiameter
+        puck.y = int(WINDOWHEIGHT/2)-puckDiameter
+        puckDirY = random.sample([-1, 1],k=1)[0] * MAXSPEED/2
+        puckDirX = random.sample([-1, 1],k=1)[0] * MAXSPEED/2
+        return (puck, puckDirY, puckDirX)
+    
     #print ("upperedge",puck.colliderect(upperEdge))
     #print ("loweredge",puck.colliderect(lowerEdge) )
     if puckDirY < 0  and puck.colliderect(upperEdge) and upperEdge.colliderect(puck):
@@ -68,15 +77,19 @@ def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, 
         puckDirY = puckDirY * -1
 
     if puckDirX > 0 and puck.colliderect(rightGoal) and puck.top > rightGoal.top and puck.bottom < rightGoal.bottom:
-        print ("puck geht ins tor")
+        score1 += 1
+        puck, puckDirX, puckDirY =  resetPuck()
+        return score1, score2, puck, puckDirX, puckDirY
     elif puckDirX > 0  and puck.colliderect(rightEdge) and rightEdge.colliderect(puck):
         puckDirX = puckDirX * -1
     elif puckDirX < 0 and puck.colliderect(leftGoal) and puck.top > leftGoal.top and puck.bottom < leftGoal.bottom:
-        print ("puck geht ins tor")
+        score2 += 1
+        puck, puckDirX, puckDirY =  resetPuck()
+        return score1, score2, puck, puckDirX, puckDirY
     elif puckDirX < 0  and puck.colliderect(leftEdge) and leftEdge.colliderect(puck):
         puckDirX = puckDirX * -1
 
-    return puckDirY,puckDirX
+    return score1, score2, puck, puckDirY, puckDirX
 
 def checkBatCollision(puck, puckDirY, puckDirX, bat):
     if puck.colliderect(bat) and bat.colliderect(puck):
@@ -120,13 +133,13 @@ def movePuck(puck, puckDirX, puckDirY):
     newDirY=0
     newDirX=0
     
-    if puckDirY > 0:
+    if puckDirY >= 0:
         newDirY = puckDirY - DECREASESPEED
-    elif puckDirY < 0:
+    elif puckDirY <= 0:
         newDirY = puckDirY + DECREASESPEED
-    if puckDirX > 0:
+    if puckDirX >= 0:
         newDirX = puckDirX - DECREASESPEED
-    elif puckDirX < 0:
+    elif puckDirX <= 0:
         newDirX = puckDirX + DECREASESPEED
     return puck ,newDirX, newDirY
 
@@ -156,6 +169,7 @@ def endResult(player):
         if seconds>6:
             Menu.main()
             pygame.quit()
+            sys.exit()
         if seconds >2:
             GAMEEND = True
 
@@ -243,12 +257,13 @@ def playerThread(connection,playerSide):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             x,y = data.split (":")
-            newX = int(x)
-            newY = int(y)
-            if playerSide:
-                LEFTBATPOSITION = newX * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * newY
-            else:
-                RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
+            if x != "game":
+                newX = int(x)
+                newY = int(y)
+                if playerSide:
+                    LEFTBATPOSITION = newX * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * newY
+                else:
+                    RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
         if GAMEEND:
             playerConnection.send("end")
 
@@ -263,7 +278,7 @@ def serverThread():
 
     gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = ""
-    port=5000
+    port = 5000
     gameSocket.bind((host,port))
     gameSocket.listen(5)
     print("socket hoert zu")
@@ -352,12 +367,10 @@ def main(connection1,connection2):
 
 
             puck, puckDirX, puckDirY = movePuck(puck, puckDirX, puckDirY)
-            puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal)
+            score1, score2, puck, puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal, score1, score2)
             puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat1)
             puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat2)
 
-            score1,puck, puckDirY, puckDirX = checkPointScored(True, puck, score1, puckDirX,puckDirY)
-            score2,puck, puckDirY, puckDirX = checkPointScored(False, puck, score2, puckDirX,puckDirY)
 
             displayScore(True,score1)
             displayScore(False,score2)

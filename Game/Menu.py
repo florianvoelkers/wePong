@@ -63,11 +63,12 @@ def playerThread(connection):
                     AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte airhockey")
                     pygame.quit()
+                    sys.exit()
                 elif game == "pong":
                     WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte wepong")
                     pygame.quit()
-                    
+                    sys.exit()
 
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads

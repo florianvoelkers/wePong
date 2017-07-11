@@ -117,7 +117,7 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY):
 # Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
 def checkPointScored(player,ball, score, ballDirX,ballDirY):
 
-    def resetBall (score):
+    def resetBall ():
         ball.x = WINDOWWIDTH/2 - LINETHICKNESS/2 + LINETHICKNESS*4
         ball.y = WINDOWHEIGHT/2 - LINETHICKNESS/2 - LINETHICKNESS*2
         ballDirY = random.sample([-STARTSPEED, STARTSPEED],k=1)
@@ -128,7 +128,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         # Ueberprueft ob Player 1 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
         if ball.right >= WINDOWWIDTH + LINETHICKNESS*4: 
             score += 1
-            ball,ballDirX,ballDirY =  resetBall(score)
+            ball,ballDirX,ballDirY =  resetBall()
             return score,ball,ballDirX,ballDirY
         # Wenn nichts passiert ist
         else: return (score,ball,ballDirX,ballDirY)
@@ -136,7 +136,7 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         # UeberprUeft ob Player 2 einen Punkt gemacht hat und setzt den Ball wieder in die Mitte
         if ball.left <= 0: 
             score += 1
-            ball,ballDirX,ballDirY =  resetBall(score)
+            ball,ballDirX,ballDirY =  resetBall()
             return score,ball,ballDirX,ballDirY
         # Wenn nichts passiert ist
         else: return (score,ball,ballDirX,ballDirY)
@@ -160,6 +160,7 @@ def endResult(player):
         if seconds>6:
             Menu.main()
             pygame.quit()
+            sys.exit()
         if seconds >2:
             GAMEEND = True
         pygame.display.update()
@@ -186,6 +187,7 @@ def countdown():
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
         pygame.display.update()
+        FPSCLOCK.tick(FPS)
         print(seconds)
 
 
@@ -374,13 +376,6 @@ def main(connection1,connection2):
             displayScore(False,score2)
 
 
-            pygame.display.update()
-            FPSCLOCK.tick(FPS)
-        else:
-            drawArena()
-            drawPaddle(paddle1)
-            drawPaddle(paddle2)
-            drawBall(ball.x,ball.y)
             pygame.display.update()
             FPSCLOCK.tick(FPS)
 

@@ -187,7 +187,6 @@ def countdown():
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
         pygame.display.update()
-        FPSCLOCK.tick(FPS)
         print(seconds)
 
 

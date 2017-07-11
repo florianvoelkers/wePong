@@ -141,15 +141,55 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         # Wenn nichts passiert ist
         else: return (score,ball,ballDirX,ballDirY)
 
+def endResult(player):
+    GAMESTART = False
+    start_ticks=pygame.time.get_ticks()
+    if player:
+        resultSurf = WINNERFONT.render("Player 1 Won!", True, WHITE)
+    else:
+        resultSurf = WINNERFONT.render("Player 2 Won!", True, WHITE)
+
+    resultRect = resultSurf.get_rect()
+    resultRect.topleft = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+    SCREEN.blit(resultSurf, resultRect)
+    while True: 
+        seconds=(pygame.time.get_ticks()-start_ticks)/300 
+        if seconds>3:
+            Menu.main()
+            pygame.quit()
+
+def countdown():
+    global GAMESTART
+    start_ticks=pygame.time.get_ticks()
+
+    while GAMESTART == False: 
+        seconds=(pygame.time.get_ticks()-start_ticks)/1000 
+        drawArena(False)
+        if seconds>3:
+            GAMESTART = True
+        elif seconds > 2:
+            resultSurf = WINNERFONT.render("1", True, WHITE)
+            resultRect = resultSurf.get_rect()
+        elif seconds > 1:
+            resultSurf = WINNERFONT.render("2", True, WHITE)
+            resultRect = resultSurf.get_rect()
+        else: 
+            resultSurf = WINNERFONT.render("3", True, WHITE)
+            resultRect = resultSurf.get_rect()
+
+        resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
+        SCREEN.blit(resultSurf, resultRect)
+        pygame.display.update()
+
+
 # Anzeige des Spieler Scores
 def displayScore(player, score):
     if score > 10:
-        Menu.main()
-        pygame.quit()
+        endResult(player)
     if player: 
-        postion = 150 
+        postion = 50 
     else:
-        postion = WINDOWWIDTH - 150 
+        postion = WINDOWWIDTH - 250 
 
     resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
     resultRect = resultSurf.get_rect()
@@ -220,8 +260,12 @@ def main(connection1,connection2):
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
-    BASICFONTSIZE = 20
+    BASICFONTSIZE = 30
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
+    global  WINNERFONT, WINNERFONTSIZE
+    WINNERFONTSIZE = 100
+    WINNERFONT = pygame.font.Font('freesansbold.ttf', WINNERFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
@@ -270,7 +314,7 @@ def main(connection1,connection2):
 
     #threading.Thread(target=serverThread, args=()).start()
 
-
+    countdown()
 
     while True:
 

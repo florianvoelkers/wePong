@@ -150,7 +150,6 @@ def endResult(player):
         if seconds>3:
             Menu.main()
             pygame.quit()
-    print (seconds)
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
@@ -216,7 +215,6 @@ def countdown():
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
         pygame.display.update()
-        print (seconds)
 
 
 # Thread um die gesendeten Daten der Spielers auszuwerten

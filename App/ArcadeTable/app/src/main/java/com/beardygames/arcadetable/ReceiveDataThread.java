@@ -5,13 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class ReceiveDataThread extends Thread {
+public class ReceiveDataThread implements Runnable {
 
-    private String data;
+    private volatile String data;
     private Socket socket;
 
     public ReceiveDataThread(){
         socket = DataHandler.getServerSocket();
+        data = "";
     }
 
     public String getData(){

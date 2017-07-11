@@ -20,7 +20,9 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
 
     private boolean playerLeft;
 
-    private SendDataThread dataThread;
+    private SendDataThread sendThread;
+    private ReceiveDataThread receiveThread;
+    private AppCompatActivity activity;
 
     private View decorView;
 
@@ -45,12 +47,17 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+        activity = this;
+
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         pitch = 0;
 
-        dataThread = new SendDataThread(false);
-        dataThread.start();
+        sendThread = new SendDataThread(false);
+        sendThread.start();
+        receiveThread = new ReceiveDataThread();
+        new Thread(receiveThread).start();
+        new Thread(new WaitForInputThread()).start();
     }
 
     @Override
@@ -70,7 +77,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
                 speed *= -1;
             }
             String data = "speed:" + speed;
-            dataThread.setData(data);
+            sendThread.setData(data);
         }
     }
 
@@ -106,6 +113,20 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         mSensorManager.unregisterListener(this);
+    }
+
+    class WaitForInputThread implements Runnable {
+
+        @Override
+        public void run() {
+            while(true){
+                if (receiveThread.getData().equals("end")){
+                    sendThread.interrupt();
+                    activity.finish();
+                    break;
+                }
+            }
+        }
     }
 
 }

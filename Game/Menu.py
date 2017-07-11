@@ -56,7 +56,6 @@ def playerThread(connection):
         if data.count(":") == 1:
             name, game = data.split (":")
             
-            print (player, game)
             if player == "player1" and GAMESTART:
                 if game == "tron":
                     print ("starte Tron")

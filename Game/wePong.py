@@ -148,20 +148,21 @@ def endResult(player):
 
     start_ticks=pygame.time.get_ticks()
     if player:
-        resultSurf = WINNERFONT.render("Player 1 Won!", True, WHITE)
+        resultSurf = WINNERFONT.render("Player 1 Wins!", True, WHITE)
     else:
-        resultSurf = WINNERFONT.render("Player 2 Won!", True, WHITE)
+        resultSurf = WINNERFONT.render("Player 2 Wins!", True, WHITE)
 
     resultRect = resultSurf.get_rect()
-    resultRect.topleft = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+    resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
     SCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
-        if seconds>3:
+        if seconds>6:
             Menu.main()
             pygame.quit()
         if seconds >2:
             GAMEEND = True
+        pygame.display.update()
 
 def countdown():
     global GAMESTART

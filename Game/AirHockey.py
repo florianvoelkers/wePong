@@ -117,7 +117,9 @@ def drawPuck(puck):
 def movePuck(puck, puckDirX, puckDirY):
     puck.x += puckDirX
     puck.y += puckDirY
-    print(puckDirX,puckDirY)
+    newDirY=0
+    newDirX=0
+    
     if puckDirY > 0:
         newDirY = puckDirY - DECREASESPEED
     elif puckDirY < 0:
@@ -147,11 +149,11 @@ def endResult(player):
         resultSurf = WINNERFONT.render("Player 2 Won!", True, WHITE)
 
     resultRect = resultSurf.get_rect()
-    resultRect.topleft = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+    resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
     SCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
-        if seconds>3:
+        if seconds>6:
             Menu.main()
             pygame.quit()
         if seconds >2:
@@ -241,10 +243,12 @@ def playerThread(connection,playerSide):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             x,y = data.split (":")
+            newX = int(x)
+            newY = int(y)
             if playerSide:
-                LEFTBATPOSITION = x * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * y
+                LEFTBATPOSITION = newX * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * newY
             else:
-                RIGHTBATPOSITION = x * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * y
+                RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
         if GAMEEND:
             playerConnection.send("end")
 
@@ -301,8 +305,8 @@ def main(connection1,connection2):
     score2 = 0
 
     # automatischer pfad auf dem Pi funktioniert unter windows nicht
-    PUCKIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"puck.png"))
-    BATIMAGE = pygame.image.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"SchlaegerRot.png"))
+    PUCKIMAGE = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","puck.png"))
+    BATIMAGE = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","SchlaegerRot.png"))
 
     #PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
     #BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))

@@ -35,7 +35,7 @@ PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 
 LEFTPADDLESPEED = 0
 RIGHTPADDLESPEED = 0
-
+GAMEEND = False
 GAMESTART = True
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
@@ -142,7 +142,10 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         else: return (score,ball,ballDirX,ballDirY)
 
 def endResult(player):
+    global GAMEEND
+    global GAMESTART
     GAMESTART = False
+
     start_ticks=pygame.time.get_ticks()
     if player:
         resultSurf = WINNERFONT.render("Player 1 Won!", True, WHITE)
@@ -157,6 +160,8 @@ def endResult(player):
         if seconds>3:
             Menu.main()
             pygame.quit()
+        if seconds >2:
+            GAMEEND = True
 
 def countdown():
     global GAMESTART
@@ -205,6 +210,7 @@ def playerThread(connection,playerSide):
     global LEFTPADDLESPEED
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
+    global GAMEEND
 
     if playerSide:
         RIGHTPLAYERCONNECTED = True
@@ -222,6 +228,8 @@ def playerThread(connection,playerSide):
 
             elif player == "player2":
                 RIGHTPADDLESPEED = int(newSpeed)
+        if GAMEEND:
+            playerConnection.send("end")
 
 # Thread der auf neue Verbindungen wartet
 def serverThread():

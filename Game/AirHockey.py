@@ -28,6 +28,7 @@ MAXSPEED = 20
 DECREASESPEED = 0.06
 
 GAMESTART = False
+GAMEEND = False
 
 LEFTBATPOSITION = 300, WINDOWHEIGHT/2 -35
 RIGHTBATPOSITION =WINDOWWIDTH-300 - 70, WINDOWHEIGHT/2 -35
@@ -135,6 +136,9 @@ def drawBat(player1):
     return bat
 
 def endResult(player):
+    global GAMEEND
+    global GAMESTART
+    
     GAMESTART = False
     start_ticks=pygame.time.get_ticks()
     if player:
@@ -150,6 +154,8 @@ def endResult(player):
         if seconds>3:
             Menu.main()
             pygame.quit()
+        if seconds >2:
+            GAMEEND = True
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
@@ -224,7 +230,8 @@ def playerThread(connection,playerSide):
     global RIGHTPLAYERCONNECTED
     global LEFTBATPOSITION
     global RIGHTBATPOSITION
-    
+    global GAMEEND
+
     if playerSide:
         RIGHTPLAYERCONNECTED = True
     else playerSide:
@@ -238,6 +245,8 @@ def playerThread(connection,playerSide):
                 LEFTBATPOSITION = x * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * y
             elif player == "player2":
                 RIGHTBATPOSITION = x * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * y
+        if GAMEEND:
+            playerConnection.send("end")
 
 
 

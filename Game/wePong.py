@@ -46,7 +46,6 @@ RIGHTPLAYERCONNECTED = False
 def exitMethod():
     global running
     running = False
-    time.sleep(0.1)
     Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
     #pygame.quit()
     #sys.exit()
@@ -167,9 +166,10 @@ def endResult(player):
     resultRect = resultSurf.get_rect()
     resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
     PONGSCREEN.blit(resultSurf, resultRect)
+    pygame.display.update()
     while True: 
-        seconds=(pygame.time.get_ticks()-start_ticks)/300 
-        if seconds>4:
+        seconds=(pygame.time.get_ticks()-start_ticks)/1000 
+        if seconds>5:
             break
         if seconds >2:
             GAMEEND = True
@@ -247,7 +247,6 @@ def playerThread(connection,playerSide):
         if GAMEEND:
             print ("send end")
             playerConnection.send("end\n")
-            playerConnection.send("theEnd")
             print ("end sended")
             break
     return
@@ -357,6 +356,7 @@ def main(connection1,connection2):
         pygame.display.update()
         FPSCLOCK.tick(FPS)
     print("wepong ende!")
+    return
 
 if __name__=='__main__':
     main()

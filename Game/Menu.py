@@ -87,11 +87,10 @@ def playerThread(connection,firstConnection,playernumber):
                     threading.Thread(target=WePong.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
 
                     game,name = "",""
-                    
+                    exitMethod()
                     break
-            elif player == "player2" and GAMESTART:
+            elif player == "player2":
                 break
-    exitMethod()
     return
 
 def serverThread():
@@ -166,10 +165,11 @@ def backToMenu(connection1,connection2):
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            else:
+            
                 
-                pygame.display.update()
-                FPSCLOCK.tick(FPS)
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+        print ("menu2 ende----------")
 
 def main():
     pygame.init()
@@ -216,6 +216,7 @@ def main():
             return
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    print("menu ende---------------------------------------")
 
 if __name__=='__main__':
     main()

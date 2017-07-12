@@ -163,7 +163,6 @@ def endResult(player):
             sys.exit()
         if seconds >2:
             GAMEEND = True
-        pygame.display.update()
 
 def countdown():
     global GAMESTART
@@ -186,8 +185,6 @@ def countdown():
 
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
-        pygame.display.update()
-        print(seconds)
 
 
 # Anzeige des Spieler Scores
@@ -322,9 +319,9 @@ def main(connection1,connection2):
     threading.Thread(target=playerThread, args=(connection2,False)).start()
 
     #threading.Thread(target=serverThread, args=()).start()
-
-    countdown()
-
+   
+    threading.Thread(target=countdown, args=()).start()
+    
     while True:
 
         # Auslesen von Tastatur eingaben
@@ -375,8 +372,8 @@ def main(connection1,connection2):
             displayScore(False,score2)
 
 
-            pygame.display.update()
-            FPSCLOCK.tick(FPS)
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 if __name__=='__main__':
     main()

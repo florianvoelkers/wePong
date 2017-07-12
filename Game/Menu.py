@@ -34,13 +34,14 @@ PLAYER1CONNECTION = 0
 
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
-def playerThread(connection,firstConnection):
+def playerThread(connection,firstConnection,playernumber):
     global PLAYER1CONNECTION
     global PLAYER2CONNECTION 
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
     global GAMESTART
 
+    player = ""
     if firstConnection:
         data = connection.recv(1024)
         player = data
@@ -51,8 +52,14 @@ def playerThread(connection,firstConnection):
         elif player == "player2":
             PLAYER2CONNECTION = connection
             RIGHTPLAYERCONNECTED = True
-
+    else:
+        if playernumber == 1:
+            player = "player1"
+        else:
+            player = "player2"
+    
     while True:
+        print(player)
         data = connection.recv(1024)
         if data.count(":") == 1:
             name, game = data.split (":")
@@ -89,7 +96,7 @@ def serverThread():
         connection,address = gameSocket.accept()
         print ("got connection",address)
         playerCount+= 1
-        threading.Thread(target=playerThread, args=(connection,True)).start()
+        threading.Thread(target=playerThread, args=(connection,True,0)).start()
     while True:
         if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
             GAMESTART = True
@@ -118,8 +125,8 @@ def backToMenu(connection1,connection2):
     resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
     background = SCREEN.blit(resizedImage, (0 , 0))
 
-    threading.Thread(target=playerThread, args=(connection1,)).start()
-    threading.Thread(target=playerThread, args=(connection2,)).start()
+    threading.Thread(target=playerThread, args=(connection1,False,1)).start()
+    threading.Thread(target=playerThread, args=(connection2,False,2)).start()
     GAMESTART = True
     while True:
 

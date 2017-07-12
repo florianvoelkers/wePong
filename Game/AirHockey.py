@@ -245,8 +245,11 @@ def playerThread(connection,playerSide):
                 else:
                     RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
         if GAMEEND:
-            playerConnection.send("end")
-
+            print ("send end")
+            playerConnection.send("end\n")
+            playerConnection.send("theEnd")
+            print ("end sended")
+            break
 
 
 

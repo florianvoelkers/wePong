@@ -192,7 +192,7 @@ def countdown():
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
-    if score > 10:
+    if score > 1:
         endResult(player)
     if player: 
         postion = 50 
@@ -235,8 +235,10 @@ def playerThread(connection,playerSide):
                 RIGHTPADDLESPEED = int(newSpeed)
         if GAMEEND:
             print ("send end")
-            playerConnection.send("end")
+            playerConnection.send("end\n")
+            playerConnection.send("theEnd")
             print ("end sended")
+            break
 
 def main(connection1,connection2):
     pygame.init()

@@ -212,6 +212,7 @@ def countdown():
             resultRect = resultSurf.get_rect()
 
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
+        SCREEN.blit(resultSurf,restultRect)
         pygame.display.update()
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
@@ -316,7 +317,6 @@ def main(connection1):#,connection2):
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     #threading.Thread(target=playerThread, args=(connection2,False)).start()
 
-    #threading.Thread(target=serverThread, args=()).start()
     countdown()
 
     while True:

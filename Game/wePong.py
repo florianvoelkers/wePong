@@ -185,7 +185,7 @@ def countdown():
 
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
         SCREEN.blit(resultSurf, resultRect)
-
+        pygame.display.update()
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
@@ -228,34 +228,6 @@ def playerThread(connection,playerSide):
                 RIGHTPADDLESPEED = int(newSpeed)
         if GAMEEND:
             playerConnection.send("end")
-
-# Thread der auf neue Verbindungen wartet
-def serverThread():
-    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
-    # fuer die jeweiligen Spieler startet
-    global GAMESTART
-    global LEFTPLAYERCONNECTED
-    global RIGHTPLAYERCONNECTED
-    print("ServerThread startet")
-
-    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = ""
-    port=5000
-    gameSocket.bind((host,port))
-    gameSocket.listen(5)
-    print("socket hoert zu")
-    playerCount = 0
-    while playerCount < 2:
-        print ("waiting for", 2-playerCount ,"connection(s)")
-        connection,address = gameSocket.accept()
-        print ("got connection",address)
-        playerCount+= 1
-        threading.Thread(target=playerThread, args=(connection,)).start()
-    while True:
-        if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
-            print ("gamestart = true und break der whileschleife")
-            GAMESTART = True
-            break
 
 def main(connection1,connection2):
     pygame.init()
@@ -317,10 +289,8 @@ def main(connection1,connection2):
     
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()
-
-    #threading.Thread(target=serverThread, args=()).start()
-   
-    threading.Thread(target=countdown, args=()).start()
+    
+    countdown()
     
     while True:
 

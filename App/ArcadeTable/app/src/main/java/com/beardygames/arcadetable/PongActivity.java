@@ -59,6 +59,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         pitch = 0;
 
+        System.out.println("in der on create methode");
         // Thread-Handling
         sendThread = new SendDataThread(false);
         sendThread.start();
@@ -138,12 +139,11 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
                     sendThread.interrupt();
                     try {
                         Thread.sleep(1000);
-                        activity.finish();
-                        break;
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
+                    activity.finish();
+                    break;
                 }
             }
         }

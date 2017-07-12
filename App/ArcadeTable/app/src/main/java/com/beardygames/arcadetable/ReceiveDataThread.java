@@ -22,16 +22,19 @@ public class ReceiveDataThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
-            data = input.next();
-            if (data.equals("end")){
-                DataHandler.setGameRunning(false);
-                //input.close();
-                return;
+        while(!data.equals("end"))
+            try {
+                Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
+                System.out.println("warte auf input");
+                data = input.next();
+                System.out.println("input  da: " + data);
+                if (data.equals("end")){
+                    DataHandler.setGameRunning(false);
+                    //input.close();
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

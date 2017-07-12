@@ -18,13 +18,16 @@ public class AirHockeyActivity extends AppCompatActivity {
     private int width;
     private int height;
 
-    private SendDataThread dataThread;
+    private SendDataThread sendThread;
+    private ReceiveDataThread receiveThread;
+    private AppCompatActivity activity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_air_hockey);
 
+        // Keeps the screen so that the app keeps running and keeps sending data
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -46,8 +49,11 @@ public class AirHockeyActivity extends AppCompatActivity {
         width = DataHandler.getScreenWidth();
         height = DataHandler.getScreenHeight();
 
-        dataThread = new SendDataThread(false);
-        dataThread.start();
+        sendThread = new SendDataThread(false);
+        sendThread.start();
+        receiveThread = new ReceiveDataThread();
+        new Thread(receiveThread).start();
+        new Thread(new WaitForInputThread()).start();
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -80,7 +86,29 @@ public class AirHockeyActivity extends AppCompatActivity {
         else{
             posY = (posY - 100) * -1;
         }
-        dataThread.setData(posX + ":" + posY);
+        sendThread.setData(posX + ":" + posY);
         return super.onTouchEvent(event);
+    }
+
+    // Always waiting for the Server to send "end", when it does go back to the menu screen
+    class WaitForInputThread implements Runnable {
+
+        @Override
+        public void run() {
+            while(true){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                String data = receiveThread.getData();
+                //System.out.print("in wait thread" + data);
+                if (data.equals("end")){
+                    sendThread.interrupt();
+                    activity.finish();
+                    break;
+                }
+            }
+        }
     }
 }

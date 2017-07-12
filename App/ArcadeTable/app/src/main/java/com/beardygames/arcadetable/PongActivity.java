@@ -31,6 +31,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pong);
 
+        // Keeps the screen so that the app keeps running and keeps sending data
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -52,6 +53,8 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         pitch = 0;
+
+        DataHandler.setGameRunning(true);
 
         sendThread = new SendDataThread(false);
         sendThread.start();
@@ -115,12 +118,15 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager.unregisterListener(this);
     }
 
+
+    // Always waiting for the Server to send "end", when it does go back to the menu screen
     class WaitForInputThread implements Runnable {
 
         @Override
         public void run() {
             while(true){
-                if (receiveThread.getData().equals("end")){
+                String data = receiveThread.getData();
+                if (data.equals("end")){
                     sendThread.interrupt();
                     activity.finish();
                     break;

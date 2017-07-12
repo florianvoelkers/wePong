@@ -30,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean startPressed;
     private boolean readyForNewEvent;
 
-    //private SendDataThread dataThread;
-
     private boolean playerSet;
     private String player;
 
@@ -62,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
         blinking = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blinking);
         startImage.startAnimation(blinking);
-
-        //dataThread = new SendDataThread(true);
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -115,13 +111,11 @@ public class MainActivity extends AppCompatActivity {
                         playerTwo.setVisibility(View.INVISIBLE);
                         player = "player1";
                         playerSet = true;
-                        System.out.println("player1");
                         DataHandler.setPlayerLeft(true);
                     } else {
                         playerOne.setVisibility(View.INVISIBLE);
                         player = "player2";
                         playerSet = true;
-                        System.out.println("player2");
                         DataHandler.setPlayerLeft(false);
                     }
 
@@ -156,8 +150,6 @@ public class MainActivity extends AppCompatActivity {
                 socket = new Socket(serverAddr, SERVERPORT);
                 DataHandler.setSocket(socket);
 
-                //dataThread.start();
-
             } catch (UnknownHostException e1) {
                 e1.printStackTrace();
             } catch (IOException e1) {
@@ -167,22 +159,15 @@ public class MainActivity extends AppCompatActivity {
             while(waitForData) {
                 if (playerSet) {
                     waitForData = false;
-                    System.out.println("player set");
                     try {
-                        System.out.println("this is data before: " + player);
                         PrintWriter out = new PrintWriter(new BufferedWriter(
                                 new OutputStreamWriter(socket.getOutputStream())),
                                 true);
-
-                        System.out.println("this is data: " + player);
-
                         out.print(player);
                         out.flush();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                } else {
-                    System.out.println("not set");
                 }
             }
         }

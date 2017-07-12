@@ -1,9 +1,9 @@
 package com.beardygames.arcadetable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class ReceiveDataThread implements Runnable {
 
@@ -22,9 +22,13 @@ public class ReceiveDataThread implements Runnable {
     @Override
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            data = in.readLine();
-
+            Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
+            data = input.next();
+            if (data.equals("end")){
+                DataHandler.setGameRunning(false);
+                //input.close();
+                return;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

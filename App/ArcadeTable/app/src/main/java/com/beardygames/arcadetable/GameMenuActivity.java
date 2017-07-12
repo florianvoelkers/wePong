@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
@@ -20,8 +21,6 @@ public class GameMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_menu);
 
-        touchReady = true;
-
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
@@ -32,6 +31,13 @@ public class GameMenuActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(uiOptions);
 
         dataThread = new SendDataThread(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        touchReady = true;
+        DataHandler.setGameRunning(true);
         dataThread.start();
     }
 
@@ -66,11 +72,11 @@ public class GameMenuActivity extends AppCompatActivity {
             intent = new Intent(this, TronActivity.class);
         }
         dataThread.setData("game:" + game);
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 startActivity(intent);
+                DataHandler.setGameRunning(false);
                 dataThread.interrupt();
             }
         }, 1000);

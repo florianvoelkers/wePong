@@ -20,24 +20,19 @@ public class SendDataThread extends Thread {
     }
 
     public void setData(String data){
-        System.out.println("data set");
         this.data = data;
         dataSet = true;
     }
 
     @Override
     public void run() {
-        while(!this.isInterrupted()){
+        while(DataHandler.getGameRunning()){
             if (onCommand){
                 if (dataSet){
                     try {
-                        System.out.println("this is data: " + data);
                         PrintWriter out = new PrintWriter(new BufferedWriter(
                                 new OutputStreamWriter(socket.getOutputStream())),
                                 true);
-
-                        System.out.println("this is data: " + data);
-
                         out.print(data);
                         out.flush();
                         data = "";
@@ -57,9 +52,6 @@ public class SendDataThread extends Thread {
                     PrintWriter out = new PrintWriter(new BufferedWriter(
                             new OutputStreamWriter(socket.getOutputStream())),
                             true);
-
-                    System.out.println(data);
-
                     out.print(data);
                     out.flush();
                 } catch (IOException e) {
@@ -67,5 +59,6 @@ public class SendDataThread extends Thread {
                 }
             }
         }
+        return;
     }
 }

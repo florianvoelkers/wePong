@@ -7,6 +7,7 @@ import socket
 import threading
 import Menu
 import os
+import time
 
 
 # Spielgeschwindigkeit
@@ -42,14 +43,21 @@ LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
 
 
+def exitMethod():
+    global running
+    running = False
+    Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
+    #pygame.quit()
+    #sys.exit()
+
 # Arena zeichnen
 def drawArena():
-    SCREEN.fill(BLUE)
-    net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
+    PONGSCREEN.fill(BLUE)
+    net = pygame.draw.rect(PONGSCREEN,GREEN,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
 
     # Rand oben und unten
-    upperEdge = pygame.draw.rect(SCREEN, GREEN, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
-    lowerEdge = pygame.draw.rect(SCREEN, GREEN, (0, 0, WINDOWWIDTH, LINETHICKNESS))
+    upperEdge = pygame.draw.rect(PONGSCREEN, GREEN, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
+    lowerEdge = pygame.draw.rect(PONGSCREEN, GREEN, (0, 0, WINDOWWIDTH, LINETHICKNESS))
     return lowerEdge, upperEdge
 
 # Schlaeger zeichnen
@@ -61,11 +69,11 @@ def drawPaddle(paddle):
     elif paddle.top < LINETHICKNESS:
         paddle.top = LINETHICKNESS
     #Schlaeger zeichnen
-    pygame.draw.rect(SCREEN, GREEN, paddle)
+    pygame.draw.rect(PONGSCREEN, GREEN, paddle)
 
 # Ball zeichnen
 def drawBall(ballX,ballY):
-    pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
+    pygame.draw.circle(PONGSCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
 
 # Ball bewegen
 def moveBall(ball,ballDirX, ballDirY):
@@ -157,16 +165,16 @@ def endResult(player):
 
     resultRect = resultSurf.get_rect()
     resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
-    SCREEN.blit(resultSurf, resultRect)
+    PONGSCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
         if seconds>6:
-            Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
-            pygame.quit()
-            sys.exit()
+            break
         if seconds >2:
             GAMEEND = True
         pygame.display.update()
+    exitMethod()
+    return
 
 def countdown():
     global GAMESTART
@@ -186,24 +194,25 @@ def countdown():
         else: 
             resultSurf = WINNERFONT.render("3", True, WHITE)
             resultRect = resultSurf.get_rect()
-
-        resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
-        SCREEN.blit(resultSurf, resultRect)
-        pygame.display.update()
+        if not GAMESTART:
+            resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
+            PONGSCREEN.blit(resultSurf, resultRect)
+            pygame.display.update()
+    return
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
     if score > 1:
         endResult(player)
     if player: 
-        postion = 50 
+        postion = 80 
     else:
-        postion = WINDOWWIDTH - 250 
+        postion = WINDOWWIDTH - 280 
 
     resultSurf = BASICFONT.render('Score = %s' %(score), True, GREEN)
     resultRect = resultSurf.get_rect()
     resultRect.topleft = (postion, 25)
-    SCREEN.blit(resultSurf, resultRect)
+    PONGSCREEN.blit(resultSurf, resultRect)
 
 
 
@@ -220,10 +229,10 @@ def playerThread(connection,playerSide):
 
     if playerSide:
         LEFTPLAYERCONNECTED = True
-        LEFTPLAYERCONNECTION = playerConnection
+        LEFTPLAYERCONNECTION = connection
     else:
         RIGHTPLAYERCONNECTED = True
-        RIGHTPLAYERCONNECTION = playerConnection
+        RIGHTPLAYERCONNECTION = connection
         
     while True:
         data = playerConnection.recv(1024)
@@ -240,14 +249,16 @@ def playerThread(connection,playerSide):
             playerConnection.send("theEnd")
             print ("end sended")
             break
+    return
 
 def main(connection1,connection2):
     pygame.init()
 
-    global SCREEN
+    global PONGSCREEN
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
-
+    global running
+    running = True
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
     BASICFONTSIZE = 50
@@ -258,7 +269,7 @@ def main(connection1,connection2):
     WINNERFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), WINNERFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    PONGSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
     FPSCLOCK = pygame.time.Clock()
@@ -268,12 +279,12 @@ def main(connection1,connection2):
 
 
     # Spielflaeche in einer Farbe
-    SCREEN.fill(BLUE)
+    PONGSCREEN.fill(BLUE)
     # Netz in der Mitte
-    net = pygame.draw.rect(SCREEN,GREEN,(WINDOWWIDTH/2-4,0,8,WINDOWHEIGHT))
+    net = pygame.draw.rect(PONGSCREEN,GREEN,(WINDOWWIDTH/2-4,0,8,WINDOWHEIGHT))
     # Rand oben und unten
-    upperEdge = pygame.draw.rect(SCREEN,GREEN,(0,WINDOWHEIGHT-LINETHICKNESS,WINDOWWIDTH,LINETHICKNESS))
-    lowerEdge = pygame.draw.rect(SCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
+    upperEdge = pygame.draw.rect(PONGSCREEN,GREEN,(0,WINDOWHEIGHT-LINETHICKNESS,WINDOWWIDTH,LINETHICKNESS))
+    lowerEdge = pygame.draw.rect(PONGSCREEN,GREEN,(0,0,WINDOWWIDTH,LINETHICKNESS))
 
     # Ball Startposition
     ballX = WINDOWWIDTH/2 - LINETHICKNESS/2 + LINETHICKNESS*4
@@ -292,7 +303,7 @@ def main(connection1,connection2):
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET , playerTwoPosition, LINETHICKNESS*3,PADDLESIZE)
 
-    ball = pygame.draw.circle(SCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
+    ball = pygame.draw.circle(PONGSCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
     
     drawArena()
     drawPaddle(paddle1)
@@ -304,8 +315,13 @@ def main(connection1,connection2):
     
     countdown()
     
-    while True:
-
+    while running:
+        time.sleep(0.01)
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
         # Spiel beenden wenn Escape gedrueckt wird
@@ -313,24 +329,8 @@ def main(connection1,connection2):
             print ("escape")
             pygame.quit()
             sys.exit()
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-
+            
         if GAMESTART:
-                    
-            # Steuerung linker Schlaeger mit Tastatur
-            if pressed[pygame.K_w]:
-                paddle1.y = paddle1.y - 5
-            if pressed[pygame.K_s]:
-                paddle1.y = paddle1.y + 5
-
-            #Steuerung rechter Schlaeger mit Tastatur
-            if pressed[pygame.K_UP]:
-                paddle2.y = paddle2.y - 5
-            if pressed[pygame.K_DOWN]:
-                paddle2.y = paddle2.y + 5
 
             # Steuerung linker Schlaeger mit Handydaten
             paddle1.y = paddle1.y + LEFTPADDLESPEED
@@ -349,10 +349,8 @@ def main(connection1,connection2):
             score1,ball,ballDirX,ballDirY = checkPointScored(True, ball, score1, ballDirX,ballDirY)
             score2,ball,ballDirX,ballDirY = checkPointScored(False, ball, score2, ballDirX,ballDirY)
 
-
             displayScore(True,score1)
             displayScore(False,score2)
-
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

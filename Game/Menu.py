@@ -10,7 +10,7 @@ import os
 import inspect
 import WePong
 import AirHockey
-
+import time
 
 # Spielgeschwindigkeit
 FPS = 60
@@ -31,6 +31,12 @@ RIGHTPLAYERCONNECTED = False
 GAMESTART = False
 PLAYER1CONNECTION = 0
 PLAYER1CONNECTION = 0
+
+def exitMethod():
+    global running
+    running = False
+    #pygame.quit()
+    #sys.exit()
 
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
@@ -54,15 +60,16 @@ def playerThread(connection,firstConnection,playernumber):
             RIGHTPLAYERCONNECTED = True
     else:
         if playernumber == 1:
+            PLAYER1CONNECTION = connection
             player = "player1"
         else:
+            PLAYER2CONNECTION = connection
             player = "player2"
     
     while True:
         data = connection.recv(1024)
         if data.count(":") == 1:
             name, game = data.split (":")
-            print(player,name,game)
             
             if player == "player1" and GAMESTART:
                 if game == "tron":
@@ -70,11 +77,15 @@ def playerThread(connection,firstConnection,playernumber):
                 elif game == "air":
                     AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte airhockey")
-                    pygame.quit()
+                    break
                 elif game == "pong":
                     WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte wepong")
-                    pygame.quit()
+                    break
+            elif player == "player2" and GAMESTART:
+                break
+    exitMethod()
+    return
 
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
@@ -101,11 +112,14 @@ def serverThread():
         if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
             GAMESTART = True
             break
+    return
 
 def backToMenu(connection1,connection2):
     pygame.init()
     global GAMESTART
-    global SCREEN
+    global MENUSCREEN
+    global running
+    running = True
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -113,23 +127,23 @@ def backToMenu(connection1,connection2):
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    MENUSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption("Menu")
 
     FPSCLOCK = pygame.time.Clock()
 
     # Spielflaeche in einer Farbe
-    SCREEN.fill(BLACK)
+    MENUSCREEN.fill(BLACK)
 
     backgroundImage = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","backGround.png"))
     resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
-    background = SCREEN.blit(resizedImage, (0 , 0))
+    background = MENUSCREEN.blit(resizedImage, (0 , 0))
 
     threading.Thread(target=playerThread, args=(connection1,False,1)).start()
     threading.Thread(target=playerThread, args=(connection2,False,2)).start()
     GAMESTART = True
-    while True:
-
+    while running:
+        time.sleep(1)
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
         # Spiel beenden wenn Escape gedrueckt wird
@@ -145,15 +159,17 @@ def backToMenu(connection1,connection2):
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-        else:
-            
-            pygame.display.update()
-            FPSCLOCK.tick(FPS)
+            else:
+                
+                pygame.display.update()
+                FPSCLOCK.tick(FPS)
 
 def main():
     pygame.init()
 
-    global SCREEN
+    global MENUSCREEN
+    global running
+    running = True
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -161,42 +177,39 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    MENUSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption("Menu")
 
     FPSCLOCK = pygame.time.Clock()
 
     # Spielflaeche in einer Farbe
-    SCREEN.fill(BLACK)
+    MENUSCREEN.fill(BLACK)
 
     # ServerThread starten
     threading.Thread(target=serverThread, args=()).start()
 
     backgroundImage = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","backGround.png"))
     resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
-    background = SCREEN.blit(resizedImage, (0 , 0))
+    background = MENUSCREEN.blit(resizedImage, (0 , 0))
 
-    while True:
-
-        # Auslesen von Tastatur eingaben
-        pressed = pygame.key.get_pressed()
-        # Spiel beenden wenn Escape gedrueckt wird
-        if pressed[pygame.K_ESCAPE]:
-            print ("escape")
-            pygame.quit()
-            sys.exit()
-            return
-        if pressed[pygame.K_SPACE]:
-            wePong.main()
-            #pygame.quit()
+    while running:
+        time.sleep(1)
+        
        	for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-        else:
-        	
-        	pygame.display.update()
-        	FPSCLOCK.tick(FPS)
+            else:
+                # Auslesen von Tastatur eingaben
+                pressed = pygame.key.get_pressed()
+                # Spiel beenden wenn Escape gedrueckt wird
+                if pressed[pygame.K_ESCAPE]:
+                    print ("escape")
+                    pygame.quit()
+                    sys.exit()
+                    return
+                pygame.display.update()
+                FPSCLOCK.tick(FPS)
 
 if __name__=='__main__':
     main()

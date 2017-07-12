@@ -7,6 +7,7 @@ import socket
 import threading
 import os
 import Menu
+import time
 
 
 
@@ -34,28 +35,32 @@ GAMEEND = False
 LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
 RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
 
+def exitMethod():
+    Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
+    #pygame.quit()
+    #sys.exit()
 
 # Arena zeichnen
 def drawArena(init):
-    SCREEN.fill(BLUE)
+    AIRSCREEN.fill(BLUE)
     
     # Rand oben und unten
-    net = pygame.draw.rect(SCREEN,RED,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
-    centerOuterCircle = pygame.draw.circle(SCREEN, RED, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 100, 0)
-    centerFillCircle = pygame.draw.circle(SCREEN, BLUE, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 90, 0)
-    centerInnerCircle = pygame.draw.circle(SCREEN, RED, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 20, 0)
-    lowerEdge = pygame.draw.rect(SCREEN, RED, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
-    upperEdge = pygame.draw.rect(SCREEN, RED, (0, 0, WINDOWWIDTH, LINETHICKNESS))
-    leftEdge = pygame.draw.rect(SCREEN, RED, (0, 0, LINETHICKNESS,WINDOWWIDTH))
-    rightEdge = pygame.draw.rect(SCREEN, RED, (WINDOWWIDTH-LINETHICKNESS, 0, LINETHICKNESS,WINDOWWIDTH))
+    net = pygame.draw.rect(AIRSCREEN,RED,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
+    centerOuterCircle = pygame.draw.circle(AIRSCREEN, RED, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 100, 0)
+    centerFillCircle = pygame.draw.circle(AIRSCREEN, BLUE, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 90, 0)
+    centerInnerCircle = pygame.draw.circle(AIRSCREEN, RED, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 20, 0)
+    lowerEdge = pygame.draw.rect(AIRSCREEN, RED, (0, WINDOWHEIGHT-LINETHICKNESS, WINDOWWIDTH, LINETHICKNESS))
+    upperEdge = pygame.draw.rect(AIRSCREEN, RED, (0, 0, WINDOWWIDTH, LINETHICKNESS))
+    leftEdge = pygame.draw.rect(AIRSCREEN, RED, (0, 0, LINETHICKNESS,WINDOWWIDTH))
+    rightEdge = pygame.draw.rect(AIRSCREEN, RED, (WINDOWWIDTH-LINETHICKNESS, 0, LINETHICKNESS,WINDOWWIDTH))
     
-    leftGoal = pygame.draw.rect(SCREEN, BLUE, (0, WINDOWHEIGHT/2-119, LINETHICKNESS,238))
-    leftGoalOutline = pygame.draw.ellipse(SCREEN, RED, (-90, WINDOWHEIGHT/2-120, 200,240))
-    leftGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (-100, WINDOWHEIGHT/2-110, 200,220))
+    leftGoal = pygame.draw.rect(AIRSCREEN, BLUE, (0, WINDOWHEIGHT/2-119, LINETHICKNESS,238))
+    leftGoalOutline = pygame.draw.ellipse(AIRSCREEN, RED, (-90, WINDOWHEIGHT/2-120, 200,240))
+    leftGoalInnerOutline = pygame.draw.ellipse(AIRSCREEN, BLUE, (-100, WINDOWHEIGHT/2-110, 200,220))
     
-    rightGoal = pygame.draw.rect(SCREEN, BLUE, (WINDOWWIDTH-LINETHICKNESS, WINDOWHEIGHT/2-119, LINETHICKNESS,238))
-    rightGoalOutline = pygame.draw.ellipse(SCREEN, RED, (WINDOWWIDTH-110, WINDOWHEIGHT/2-120, 200,240))
-    rightGoalInnerOutline = pygame.draw.ellipse(SCREEN, BLUE, (WINDOWWIDTH-100, WINDOWHEIGHT/2-110, 200,220))
+    rightGoal = pygame.draw.rect(AIRSCREEN, BLUE, (WINDOWWIDTH-LINETHICKNESS, WINDOWHEIGHT/2-119, LINETHICKNESS,238))
+    rightGoalOutline = pygame.draw.ellipse(AIRSCREEN, RED, (WINDOWWIDTH-110, WINDOWHEIGHT/2-120, 200,240))
+    rightGoalInnerOutline = pygame.draw.ellipse(AIRSCREEN, BLUE, (WINDOWWIDTH-100, WINDOWHEIGHT/2-110, 200,220))
     
     if init:
         return lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal
@@ -128,7 +133,7 @@ def checkBatCollision(puck, puckDirY, puckDirX, bat):
     return newDirY, newDirX
 
 def drawPuck(puck):
-    newPuck = SCREEN.blit(PUCKIMAGE, (puck.x,puck.y))
+    newPuck = AIRSCREEN.blit(PUCKIMAGE, (puck.x,puck.y))
     return newPuck
 
 def movePuck(puck, puckDirX, puckDirY):
@@ -148,9 +153,9 @@ def movePuck(puck, puckDirX, puckDirY):
 
 def drawBat(player1):
     if player1:
-        bat = SCREEN.blit(BATIMAGE, LEFTBATPOSITION)
+        bat = AIRSCREEN.blit(BATIMAGE, LEFTBATPOSITION)
     else:
-        bat = SCREEN.blit(BATIMAGE, RIGHTBATPOSITION)
+        bat = AIRSCREEN.blit(BATIMAGE, RIGHTBATPOSITION)
     return bat
 
 def endResult(player):
@@ -168,29 +173,29 @@ def endResult(player):
 
     resultRect = resultSurf.get_rect()
     resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
-    SCREEN.blit(resultSurf, resultRect)
+    AIRSCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
         if seconds>6:
-            Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
-            pygame.quit()
-            sys.exit()
+            break
         if seconds >2:
             GAMEEND = True
+    exitMethod()
+    return
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
     if score > 10:
         endResult(player)
     if player: 
-        postion = 50 
+        postion = 80 
     else:
-        postion = WINDOWWIDTH - 250 
+        postion = WINDOWWIDTH - 280 
 
     resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
     resultRect = resultSurf.get_rect()
     resultRect.topleft = (postion, 25)
-    SCREEN.blit(resultSurf, resultRect)
+    AIRSCREEN.blit(resultSurf, resultRect)
 
 def countdown():
     global GAMESTART
@@ -210,10 +215,11 @@ def countdown():
         else: 
             resultSurf = WINNERFONT.render("3", True, WHITE)
             resultRect = resultSurf.get_rect()
-
-        resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
-        SCREEN.blit(resultSurf,resultRect)
-        pygame.display.update()
+        if not GAMESTART:
+            resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
+            AIRSCREEN.blit(resultSurf,resultRect)
+            pygame.display.update()
+    return
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection,playerSide):
@@ -250,19 +256,19 @@ def playerThread(connection,playerSide):
             playerConnection.send("theEnd")
             print ("end sended")
             break
-
+    return
 
 
 def main(connection1,connection2):
     pygame.init()
 
-    global SCREEN
+    global AIRSCREEN
     global PUCKIMAGE
     global BATIMAGE
     global BATMASK
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    AIRSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
     FPSCLOCK = pygame.time.Clock()
@@ -285,7 +291,7 @@ def main(connection1,connection2):
     #PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
     #BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
     puckDiameter = PUCKIMAGE.get_height() / 2
-    puck = SCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
+    puck = AIRSCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
     bat1 = drawBat(True)
     bat2 = drawBat(False)
 
@@ -303,7 +309,11 @@ def main(connection1,connection2):
     countdown()
 
     while True:
-
+        
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
         # Auslesen von Tastatur eingaben
         pressed = pygame.key.get_pressed()
         # Spiel beenden wenn Escape gedrueckt wird
@@ -311,24 +321,18 @@ def main(connection1,connection2):
             print ("escape")
             pygame.quit()
             sys.exit()
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
 
         if GAMESTART:
-
+            print ("Gamestarttrue")
             drawArena(False)
             drawPuck(puck)
             bat1 = drawBat(True)
             bat2 = drawBat(False)
 
-
             puck, puckDirX, puckDirY = movePuck(puck, puckDirX, puckDirY)
             score1, score2, puck, puckDirY, puckDirX = checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal, score1, score2)
             puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat1)
             puckDirY, puckDirX = checkBatCollision(puck, puckDirY, puckDirX, bat2)
-
 
             displayScore(True,score1)
             displayScore(False,score2)

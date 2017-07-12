@@ -225,7 +225,7 @@ def playerThread(connection,playerSide):
     global GAMEEND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
-
+    
     if playerSide:
         RIGHTPLAYERCONNECTED = True
         RIGHTPLAYERCONNECTION = playerConnection
@@ -269,11 +269,11 @@ def main(connection1,connection2):
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
-    BASICFONTSIZE = 30
-    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+    BASICFONTSIZE = 50
+    BASICFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), BASICFONTSIZE)
     global  WINNERFONT, WINNERFONTSIZE
     WINNERFONTSIZE = 100
-    WINNERFONT = pygame.font.Font('freesansbold.ttf', WINNERFONTSIZE)
+    WINNERFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), WINNERFONTSIZE)
 
     score1 = 0
     score2 = 0

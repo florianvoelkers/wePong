@@ -59,10 +59,10 @@ def playerThread(connection,firstConnection,playernumber):
             player = "player2"
     
     while True:
-        print(player)
         data = connection.recv(1024)
         if data.count(":") == 1:
             name, game = data.split (":")
+            print(player,name,game)
             
             if player == "player1" and GAMESTART:
                 if game == "tron":
@@ -104,7 +104,7 @@ def serverThread():
 
 def backToMenu(connection1,connection2):
     pygame.init()
-
+    global GAMESTART
     global SCREEN
 
     # Einstellungen der Schriftart

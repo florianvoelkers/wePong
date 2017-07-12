@@ -6,6 +6,7 @@ import random
 import socket
 import threading
 import Menu
+import os
 
 
 # Spielgeschwindigkeit
@@ -218,11 +219,11 @@ def playerThread(connection,playerSide):
     global RIGHTPLAYERCONNECTION
 
     if playerSide:
-        RIGHTPLAYERCONNECTED = True
-        RIGHTPLAYERCONNECTION = playerConnection
-    else:
         LEFTPLAYERCONNECTED = True
         LEFTPLAYERCONNECTION = playerConnection
+    else:
+        RIGHTPLAYERCONNECTED = True
+        RIGHTPLAYERCONNECTION = playerConnection
         
     while True:
         data = playerConnection.recv(1024)
@@ -249,12 +250,12 @@ def main(connection1,connection2):
 
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
-    BASICFONTSIZE = 30
-    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+    BASICFONTSIZE = 50
+    BASICFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), BASICFONTSIZE)
 
     global  WINNERFONT, WINNERFONTSIZE
     WINNERFONTSIZE = 100
-    WINNERFONT = pygame.font.Font('freesansbold.ttf', WINNERFONTSIZE)
+    WINNERFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), WINNERFONTSIZE)
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    

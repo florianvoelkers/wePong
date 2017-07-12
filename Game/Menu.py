@@ -60,12 +60,12 @@ def playerThread(connection):
                 if game == "tron":
                     print ("starte Tron")
                 elif game == "air":
-                    AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                    AirHockey.main(PLAYER1CONNECTION)#,PLAYER2CONNECTION)
                     print("Starte airhockey")
                     pygame.quit()
                     sys.exit()
                 elif game == "pong":
-                    WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                    WePong.main(PLAYER1CONNECTION)#,PLAYER2CONNECTION)
                     print("Starte wepong")
                     pygame.quit()
                     sys.exit()
@@ -85,14 +85,14 @@ def serverThread():
     gameSocket.listen(5)
     print("socket hoert zu")
     playerCount = 0
-    while playerCount < 2:
+    while playerCount < 1:
         print ("waiting for", 2-playerCount ,"connection(s)")
         connection,address = gameSocket.accept()
         print ("got connection",address)
         playerCount+= 1
         threading.Thread(target=playerThread, args=(connection,)).start()
     while True:
-        if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
+        if LEFTPLAYERCONNECTED: #and RIGHTPLAYERCONNECTED:
             GAMESTART = True
             break
 

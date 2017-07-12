@@ -1,5 +1,5 @@
 #!/usr/lib/python2.7
-
+from __future__ import division
 import pygame, sys
 from pygame.locals import *
 import random
@@ -7,6 +7,7 @@ import socket
 import threading
 import os
 import Menu
+
 
 
 # Spielgeschwindigkeit
@@ -30,8 +31,8 @@ DECREASESPEED = 0.06
 GAMESTART = False
 GAMEEND = False
 
-LEFTBATPOSITION = 300, WINDOWHEIGHT/2 -35
-RIGHTBATPOSITION =WINDOWWIDTH-300 - 70, WINDOWHEIGHT/2 -35
+LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
+RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
 
 
 # Arena zeichnen
@@ -92,36 +93,41 @@ def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, 
     return score1, score2, puck, puckDirY, puckDirX
 
 def checkBatCollision(puck, puckDirY, puckDirX, bat):
+    global MAXSPEED
+    newDirY,newDirX = 0,0
     if puck.colliderect(bat) and bat.colliderect(puck):
+
         if puck.centerx < bat.centerx and puck.centery < bat.centery: # puck ist links oben vom schlaeger
             distanceX = bat.centerx - puck.centerx
             distanceY = bat.centery - puck.centery
             distanceSum = distanceX + distanceY
-            puckDirY = - MAXSPEED * (distanceY/distanceSum)
-            puckDirX = - MAXSPEED * (distanceX/distanceSum)
+            newDirY = - MAXSPEED * (distanceY/distanceSum)
+            newDirX = - MAXSPEED * (distanceX/distanceSum)
 
         elif puck.centerx > bat.centerx and puck.centery < bat.centery: # puck ist rechts oben vom schlaeger
             distanceX = puck.centerx - bat.centerx 
             distanceY = bat.centery - puck.centery
             distanceSum = distanceX + distanceY
-            puckDirY = - MAXSPEED * (distanceY/distanceSum)
-            puckDirX = MAXSPEED * (distanceX/distanceSum)
+            newDirY = - MAXSPEED * (distanceY/distanceSum)
+            newDirX = MAXSPEED * (distanceX/distanceSum)
 
         elif puck.centerx < bat.centerx and puck.centery > bat.centery: # puck ist links unten vom schlaeger
             distanceX = bat.centerx - puck.centerx
             distanceY = puck.centery -bat.centery
             distanceSum = distanceX + distanceY
-            puckDirY = MAXSPEED * (distanceY/distanceSum)
-            puckDirX = - MAXSPEED * (distanceX/distanceSum)
+            newDirY = MAXSPEED * (distanceY/distanceSum)
+            newDirX = - MAXSPEED * (distanceX/distanceSum)
 
         elif puck.centerx > bat.centerx and puck.centery > bat.centery: # puck ist rechts unten vom schlaeger
             distanceX = puck.centerx - bat.centerx
             distanceY = puck.centery - bat.centery
             distanceSum = distanceX + distanceY
-            puckDirY = MAXSPEED * (distanceY/distanceSum)
-            puckDirX = MAXSPEED * (distanceX/distanceSum)
-
-    return puckDirY, puckDirX
+            newDirY = MAXSPEED * (distanceY/distanceSum)
+            newDirX = MAXSPEED * (distanceX/distanceSum)
+    else:
+        newDirY = puckDirY
+        newDirX = puckDirX
+    return newDirY, newDirX
 
 def drawPuck(puck):
     newPuck = SCREEN.blit(PUCKIMAGE, (puck.x,puck.y))
@@ -130,9 +136,7 @@ def drawPuck(puck):
 def movePuck(puck, puckDirX, puckDirY):
     puck.x += puckDirX
     puck.y += puckDirY
-    newDirY=0
-    newDirX=0
-    
+    newDirX, newDirY = 0,0
     if puckDirY >= 0:
         newDirY = puckDirY - DECREASESPEED
     elif puckDirY <= 0:
@@ -141,6 +145,7 @@ def movePuck(puck, puckDirX, puckDirY):
         newDirX = puckDirX - DECREASESPEED
     elif puckDirX <= 0:
         newDirX = puckDirX + DECREASESPEED
+
     return puck ,newDirX, newDirY
 
 def drawBat(player1):
@@ -187,34 +192,6 @@ def displayScore(player, score):
     resultRect.topleft = (postion, 25)
     SCREEN.blit(resultSurf, resultRect)
 
-# Ueberprueft ob ein Punkt erziehlt wurde und gibt den neuen Score zurueck 
-def checkPointScored(player,puck, score, puckDirX,puckDirY):
-
-    def resetPuck (score):
-        puckDiameter = puck.height / 2
-        puck.x = int(WINDOWWIDTH/2) - puckDiameter
-        puck.y = int(WINDOWHEIGHT/2)-puckDiameter
-        puckDirY = random.sample([-1, 1],k=1)[0] * MAXSPEED/2
-        puckDirX = random.sample([-1, 1],k=1)[0] * MAXSPEED/2
-        return (puck, puckDirY, puckDirX)
-
-    if player:
-        # Ueberprueft ob Player 1 einen Punkt gemacht hat und setzt den Puck wieder in die Mitte
-        if puck.right >= WINDOWWIDTH + 30: 
-            score += 1
-            puck, puckDirX, puckDirY =  resetPuck(score)
-            return score, puck, puckDirX, puckDirY
-        # Wenn nichts passiert ist
-        else: return (score, puck, puckDirX, puckDirY)
-    else:
-        # UeberprUeft ob Player 2 einen Punkt gemacht hat und setzt den Puck wieder in die Mitte
-        if puck.left <= -30: 
-            score += 1
-            puck, puckDirX, puckDirY =  resetPuck(score)
-            return score, puck, puckDirX, puckDirY
-        # Wenn nichts passiert ist
-        else: return (score, puck, puckDirX, puckDirY)
-
 def countdown():
     global GAMESTART
     start_ticks=pygame.time.get_ticks()
@@ -235,7 +212,7 @@ def countdown():
             resultRect = resultSurf.get_rect()
 
         resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
-
+        pygame.display.update()
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection,playerSide):
@@ -292,7 +269,7 @@ def serverThread():
             GAMESTART = True
             break
 
-def main(connection1,connection2):
+def main(connection1):#,connection2):
     pygame.init()
 
     global SCREEN
@@ -337,10 +314,10 @@ def main(connection1,connection2):
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
 
     threading.Thread(target=playerThread, args=(connection1,True)).start()
-    threading.Thread(target=playerThread, args=(connection2,False)).start()
+    #threading.Thread(target=playerThread, args=(connection2,False)).start()
 
     #threading.Thread(target=serverThread, args=()).start()
-    threading.Thread(target=countdown, args=()).start()
+    countdown()
 
     while True:
 

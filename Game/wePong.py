@@ -1,5 +1,5 @@
 #!/usr/lib/python2.7
-
+from __future__ import division
 import pygame, sys
 from pygame.locals import *
 import random

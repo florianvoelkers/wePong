@@ -60,7 +60,7 @@ def drawPaddle(paddle):
     elif paddle.top < LINETHICKNESS:
         paddle.top = LINETHICKNESS
     #Schlaeger zeichnen
-    pygame.draw.rect(SCREEN, WHITE, paddle)
+    pygame.draw.rect(SCREEN, GREEN, paddle)
 
 # Ball zeichnen
 def drawBall(ballX,ballY):
@@ -163,6 +163,7 @@ def endResult(player):
             sys.exit()
         if seconds >2:
             GAMEEND = True
+        pygame.display.update()
 
 def countdown():
     global GAMESTART
@@ -227,7 +228,9 @@ def playerThread(connection,playerSide):
             else:
                 RIGHTPADDLESPEED = int(newSpeed)
         if GAMEEND:
+            print ("send end")
             playerConnection.send("end")
+            print ("end sended")
 
 def main(connection1,connection2):
     pygame.init()

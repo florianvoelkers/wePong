@@ -83,7 +83,7 @@ def serverThread():
     gameSocket.listen(5)
     print("socket hoert zu")
     playerCount = 0
-    while playerCount < 1:
+    while playerCount < 2:
         print ("waiting for", 2-playerCount ,"connection(s)")
         connection,address = gameSocket.accept()
         print ("got connection",address)

@@ -67,20 +67,27 @@ def playerThread(connection,firstConnection,playernumber):
             player = "player2"
     
     while True:
+        print("warte")
         data = connection.recv(1024)
+        print("daten bekommen",data)
         if data.count(":") == 1:
             name, game = data.split (":")
-            
+            print(player,name,game)
             if player == "player1" and GAMESTART:
                 if game == "tron":
                     print ("starte Tron")
                 elif game == "air":
                     AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
                     print("Starte airhockey")
+                    game,name = "",""
                     break
                 elif game == "pong":
-                    WePong.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
-                    print("Starte wepong")
+                    print("Starte wepong", game,name,player)
+                    
+                    threading.Thread(target=WePong.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
+
+                    game,name = "",""
+                    
                     break
             elif player == "player2" and GAMESTART:
                 break
@@ -199,17 +206,16 @@ def main():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            else:
-                # Auslesen von Tastatur eingaben
-                pressed = pygame.key.get_pressed()
-                # Spiel beenden wenn Escape gedrueckt wird
-                if pressed[pygame.K_ESCAPE]:
-                    print ("escape")
-                    pygame.quit()
-                    sys.exit()
-                    return
-                pygame.display.update()
-                FPSCLOCK.tick(FPS)
+        # Auslesen von Tastatur eingaben
+        pressed = pygame.key.get_pressed()
+        # Spiel beenden wenn Escape gedrueckt wird
+        if pressed[pygame.K_ESCAPE]:
+            print ("escape")
+            pygame.quit()
+            sys.exit()
+            return
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 if __name__=='__main__':
     main()

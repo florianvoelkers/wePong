@@ -46,6 +46,7 @@ RIGHTPLAYERCONNECTED = False
 def exitMethod():
     global running
     running = False
+    time.sleep(0.1)
     Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
     #pygame.quit()
     #sys.exit()
@@ -168,11 +169,10 @@ def endResult(player):
     PONGSCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
-        if seconds>6:
+        if seconds>4:
             break
         if seconds >2:
             GAMEEND = True
-        pygame.display.update()
     exitMethod()
     return
 
@@ -238,11 +238,12 @@ def playerThread(connection,playerSide):
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             name, speed = data.split (":")
-            newSpeed = int(speed) * 2
-            if playerSide:
-                LEFTPADDLESPEED = int(newSpeed)
-            else:
-                RIGHTPADDLESPEED = int(newSpeed)
+            if speed != "pong":
+                newSpeed = int(speed) * 2
+                if playerSide:
+                    LEFTPADDLESPEED = int(newSpeed)
+                else:
+                    RIGHTPADDLESPEED = int(newSpeed)
         if GAMEEND:
             print ("send end")
             playerConnection.send("end\n")
@@ -258,6 +259,8 @@ def main(connection1,connection2):
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
     global running
+    global GAMEEND
+    
     running = True
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -276,7 +279,7 @@ def main(connection1,connection2):
 
     score1 = 0
     score2 = 0
-
+    GAMEEND = False
 
     # Spielflaeche in einer Farbe
     PONGSCREEN.fill(BLUE)
@@ -316,7 +319,6 @@ def main(connection1,connection2):
     countdown()
     
     while running:
-        time.sleep(0.01)
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -354,6 +356,7 @@ def main(connection1,connection2):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    print("wepong ende!")
 
 if __name__=='__main__':
     main()

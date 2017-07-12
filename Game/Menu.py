@@ -34,22 +34,23 @@ PLAYER1CONNECTION = 0
 
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
-def playerThread(connection):
+def playerThread(connection,firstConnection):
     global PLAYER1CONNECTION
     global PLAYER2CONNECTION 
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
     global GAMESTART
 
-    data = connection.recv(1024)
-    player = data
-    print ("player",player)
-    if player == "player1":
-        PLAYER1CONNECTION = connection
-        LEFTPLAYERCONNECTED = True
-    elif player == "player2":
-        PLAYER2CONNECTION = connection
-        RIGHTPLAYERCONNECTED = True
+    if firstConnection:
+        data = connection.recv(1024)
+        player = data
+        print ("player",player)
+        if player == "player1":
+            PLAYER1CONNECTION = connection
+            LEFTPLAYERCONNECTED = True
+        elif player == "player2":
+            PLAYER2CONNECTION = connection
+            RIGHTPLAYERCONNECTED = True
 
     while True:
         data = connection.recv(1024)
@@ -88,11 +89,59 @@ def serverThread():
         connection,address = gameSocket.accept()
         print ("got connection",address)
         playerCount+= 1
-        threading.Thread(target=playerThread, args=(connection,)).start()
+        threading.Thread(target=playerThread, args=(connection,True)).start()
     while True:
         if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
             GAMESTART = True
             break
+
+def backToMenu(connection1,connection2):
+    pygame.init()
+
+    global SCREEN
+
+    # Einstellungen der Schriftart
+    global BASICFONT, BASICFONTSIZE
+    BASICFONTSIZE = 20
+    BASICFONT = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+
+    # Display Objekt erstellen auf dem dann alles dargestellt wird
+    SCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    pygame.display.set_caption("Menu")
+
+    FPSCLOCK = pygame.time.Clock()
+
+    # Spielflaeche in einer Farbe
+    SCREEN.fill(BLACK)
+
+    backgroundImage = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","backGround.png"))
+    resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
+    background = SCREEN.blit(resizedImage, (0 , 0))
+
+    threading.Thread(target=playerThread, args=(connection1,)).start()
+    threading.Thread(target=playerThread, args=(connection2,)).start()
+    GAMESTART = True
+    while True:
+
+        # Auslesen von Tastatur eingaben
+        pressed = pygame.key.get_pressed()
+        # Spiel beenden wenn Escape gedrueckt wird
+        if pressed[pygame.K_ESCAPE]:
+            print ("escape")
+            pygame.quit()
+            sys.exit()
+            return
+        if pressed[pygame.K_SPACE]:
+            wePong.main()
+            #pygame.quit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        else:
+            
+            pygame.display.update()
+            FPSCLOCK.tick(FPS)
 
 def main():
     pygame.init()

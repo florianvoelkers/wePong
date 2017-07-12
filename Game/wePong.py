@@ -144,6 +144,8 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 def endResult(player):
     global GAMEEND
     global GAMESTART
+    global LEFTPLAYERCONNECTION
+    global RIGHTPLAYERCONNECTION
     GAMESTART = False
 
     start_ticks=pygame.time.get_ticks()
@@ -158,7 +160,7 @@ def endResult(player):
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
         if seconds>6:
-            Menu.main()
+            Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
             pygame.quit()
             sys.exit()
         if seconds >2:
@@ -212,12 +214,16 @@ def playerThread(connection,playerSide):
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
     global GAMEEND
+    global LEFTPLAYERCONNECTION
+    global RIGHTPLAYERCONNECTION
 
     if playerSide:
         RIGHTPLAYERCONNECTED = True
+        RIGHTPLAYERCONNECTION = playerConnection
     else:
         LEFTPLAYERCONNECTED = True
-
+        LEFTPLAYERCONNECTION = playerConnection
+        
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:

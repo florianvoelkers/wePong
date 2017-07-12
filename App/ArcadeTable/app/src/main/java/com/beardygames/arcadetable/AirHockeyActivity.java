@@ -35,6 +35,8 @@ public class AirHockeyActivity extends AppCompatActivity {
         DataHandler.setGameRunning(true);
         playerLeft = DataHandler.getPlayerLeft();
 
+        activity = this;
+
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
@@ -96,17 +98,19 @@ public class AirHockeyActivity extends AppCompatActivity {
         @Override
         public void run() {
             while(true){
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 String data = receiveThread.getData();
-                //System.out.print("in wait thread" + data);
                 if (data.equals("end")){
+                    System.out.println("we are the world!");
                     sendThread.interrupt();
-                    activity.finish();
-                    break;
+                    try {
+                        Thread.sleep(1000);
+                        activity.finish();
+                        System.out.println("activity finished");
+                        break;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
         }

@@ -16,7 +16,9 @@ public class TronActivity extends AppCompatActivity {
 
     private int width;
 
-    private SendDataThread dataThread;
+    private SendDataThread sendThread;
+    private ReceiveDataThread receiveThread;
+    private AppCompatActivity activity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,12 +41,17 @@ public class TronActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+        activity = this;
+
         actionDone = false;
         direction = "";
         width = DataHandler.getScreenWidth();
 
-        dataThread = new SendDataThread(true);
-        dataThread.start();
+        sendThread = new SendDataThread(false);
+        sendThread.start();
+        receiveThread = new ReceiveDataThread();
+        new Thread(receiveThread).start();
+        new Thread(new WaitForInputThread()).start();
     }
 
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
@@ -86,5 +93,29 @@ public class TronActivity extends AppCompatActivity {
         }
 
         return super.onTouchEvent(event);
+    }
+
+    // Always waiting for the Server to send "end", when it does go back to the menu screen
+    class WaitForInputThread implements Runnable {
+
+        @Override
+        public void run() {
+            while(true){
+                String data = receiveThread.getData();
+                if (data.equals("end")){
+                    System.out.println("we are the world!");
+                    sendThread.interrupt();
+                    try {
+                        Thread.sleep(1000);
+                        activity.finish();
+                        System.out.println("activity finished");
+                        break;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }
     }
 }

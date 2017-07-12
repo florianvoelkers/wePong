@@ -30,12 +30,13 @@ public class GameMenuActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
-        dataThread = new SendDataThread(true);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        dataThread = new SendDataThread(true);
         touchReady = true;
         DataHandler.setGameRunning(true);
         dataThread.start();

@@ -127,9 +127,17 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
             while(true){
                 String data = receiveThread.getData();
                 if (data.equals("end")){
+                    System.out.println("we are the world!");
                     sendThread.interrupt();
-                    activity.finish();
-                    break;
+                    try {
+                        Thread.sleep(1000);
+                        activity.finish();
+                        System.out.println("activity finished");
+                        break;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
         }

@@ -4,7 +4,7 @@ import android.content.res.Resources;
 
 import java.net.Socket;
 
-// Handles all the data that has to be saved, e.g. which player the user is or screen sizes
+// Handles all the data that has to be saved, e.g. which player the user is, screen sizes or the socket
 public class DataHandler {
 
     private static boolean playerLeft;
@@ -19,9 +19,7 @@ public class DataHandler {
         return playerLeft;
     }
 
-    public static void setSocket(Socket socket){
-        serverSocket = socket;
-    }
+    public static void setSocket(Socket socket){serverSocket = socket;}
 
     public static Socket getServerSocket(){
         return serverSocket;

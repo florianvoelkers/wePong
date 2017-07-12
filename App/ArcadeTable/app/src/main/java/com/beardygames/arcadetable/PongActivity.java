@@ -14,12 +14,14 @@ import android.view.WindowManager;
 
 public class PongActivity extends AppCompatActivity implements SensorEventListener {
 
+    // Variables for sensor data
     private SensorManager mSensorManager;
     private Sensor rotationSensor;
     private double pitch;
 
     private boolean playerLeft;
 
+    // Variables for sending and receiving data
     private SendDataThread sendThread;
     private ReceiveDataThread receiveThread;
     private AppCompatActivity activity;
@@ -39,6 +41,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
         DataHandler.setGameRunning(true);
         playerLeft = DataHandler.getPlayerLeft();
 
+        // This code is taken from: https://developer.android.com/training/system-ui/immersive.html
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
@@ -48,14 +51,15 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+        // needed so that the activity can be closed from the thread
         activity = this;
 
+        // we use the game rotation vector to measure the pitch value of the smartphone
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         rotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         pitch = 0;
 
-        DataHandler.setGameRunning(true);
-
+        // Thread-Handling
         sendThread = new SendDataThread(false);
         sendThread.start();
         receiveThread = new ReceiveDataThread();
@@ -66,20 +70,24 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR) {
-            // Umrechnung Rotationsvektor --> Rotationsmatrix
+            // Calculate the rotation matrix from the rotation vector
             float[] rotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values);
-            //Umrechnung Rotationsmatrix --> Orientierung (3 Winkel)
+
+            // Calculate the orientation from the rotation matrix
             final float[] orientationAngles = new float[3];
             SensorManager.getOrientation(rotationMatrix, orientationAngles);
 
             pitch = orientationAngles[1] * 360 / (2 * Math.PI);
 
+            // calculate the speed for the game running on the raspberry pi
             int speed = (int) (pitch / 10);
-            if (!playerLeft){
+            if (playerLeft){
                 speed *= -1;
             }
             String data = "speed:" + speed;
+
+            // Gives the data to the sendThread to send it to the raspberry pi
             sendThread.setData(data);
         }
     }
@@ -88,6 +96,7 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
+    // This code is taken from: https://developer.android.com/training/system-ui/immersive.html
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
     // Semi-transparent bars temporarily appear and then hide again.
     // The act of swiping doesn't clear any flags, nor does it trigger your system UI visibility change listeners,
@@ -96,13 +105,12 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 
@@ -127,12 +135,10 @@ public class PongActivity extends AppCompatActivity implements SensorEventListen
             while(true){
                 String data = receiveThread.getData();
                 if (data.equals("end")){
-                    System.out.println("we are the world!");
                     sendThread.interrupt();
                     try {
                         Thread.sleep(1000);
                         activity.finish();
-                        System.out.println("activity finished");
                         break;
                     } catch (InterruptedException e) {
                         e.printStackTrace();

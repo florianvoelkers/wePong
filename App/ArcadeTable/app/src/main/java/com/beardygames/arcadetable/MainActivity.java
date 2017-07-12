@@ -21,15 +21,17 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Variables for the GUI
     private View decorView;
     private Animation blinking;
     private ImageView startImage;
     private ImageView playerOne;
     private ImageView playerTwo;
     private ImageView seperator;
+
+    // Handling touch events
     private boolean startPressed;
     private boolean readyForNewEvent;
-
     private boolean playerSet;
     private String player;
 
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         startPressed = false;
         playerSet = false;
 
+        // This code is taken from: https://developer.android.com/training/system-ui/immersive.html
         decorView = getWindow().getDecorView();
         // Hide both the navigation bar and the status bar.
         // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
+        // set the images sources for the gui
         startImage = (ImageView) findViewById(R.id.start);
         playerOne = (ImageView) findViewById(R.id.player_one);
         playerOne.setVisibility(View.INVISIBLE);
@@ -57,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
         playerTwo.setVisibility(View.INVISIBLE);
         seperator = (ImageView) findViewById(R.id.seperator);
         seperator.setVisibility(View.INVISIBLE);
-
         blinking = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blinking);
         startImage.startAnimation(blinking);
     }
 
+    // This code is taken from: https://developer.android.com/training/system-ui/immersive.html
     // The IMMERSIVE_STICKY flag, and the user swipes to display the system bars.
     // Semi-transparent bars temporarily appear and then hide again.
     // The act of swiping doesn't clear any flags, nor does it trigger your system UI visibility change listeners,
@@ -70,13 +74,12 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         }
     }
 

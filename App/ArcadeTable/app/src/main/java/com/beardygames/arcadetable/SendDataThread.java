@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+// Handles sending data to the server
 public class SendDataThread extends Thread {
 
     private String data;

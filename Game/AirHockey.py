@@ -70,8 +70,6 @@ def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, 
         puckDirX = random.sample([-1, 1],k=1)[0] * MAXSPEED/2
         return (puck, puckDirY, puckDirX)
     
-    #print ("upperedge",puck.colliderect(upperEdge))
-    #print ("loweredge",puck.colliderect(lowerEdge) )
     if puckDirY < 0  and puck.colliderect(upperEdge) and upperEdge.colliderect(puck):
         puckDirY = puckDirY * -1
     elif puckDirY > 0  and puck.colliderect(lowerEdge) and lowerEdge.colliderect(puck):
@@ -245,32 +243,8 @@ def playerThread(connection,playerSide):
 
 
 
-def serverThread():
-    # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
-    # fuer die jeweiligen Spieler startet
-    global GAMESTART
-    global LEFTPLAYERCONNECTED
-    global RIGHTPLAYERCONNECTED
 
-    gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = ""
-    port = 5000
-    gameSocket.bind((host,port))
-    gameSocket.listen(5)
-    print("socket hoert zu")
-    playerCount = 0
-    while playerCount < 2:
-        print ("waiting for", 2-playerCount ,"connection(s)")
-        connection,address = gameSocket.accept()
-        print ("got connection",address)
-        playerCount+= 1
-        threading.Thread(target=playerThread, args=(connection,)).start()
-    while True:
-        if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
-            GAMESTART = True
-            break
-
-def main(connection1):#,connection2):
+def main(connection1,connection2):
     pygame.init()
 
     global SCREEN
@@ -315,7 +289,7 @@ def main(connection1):#,connection2):
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
 
     threading.Thread(target=playerThread, args=(connection1,True)).start()
-    #threading.Thread(target=playerThread, args=(connection2,False)).start()
+    threading.Thread(target=playerThread, args=(connection2,False)).start()
 
     countdown()
 

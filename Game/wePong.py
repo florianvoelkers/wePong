@@ -24,8 +24,8 @@ LINETHICKNESS = 4
 # Farben vor definieren
 WHITE = [255, 255, 255]
 RED = [255, 0, 0]
-BLUE = [0, 0, 255]
-GREEN = [0, 255, 0]
+BLUE = [67, 66, 124]
+GREEN = [255, 136, 0]
 
 STARTSPEED = 1
 MAXSPEED = 2.4
@@ -196,7 +196,7 @@ def displayScore(player, score):
     else:
         postion = WINDOWWIDTH - 250 
 
-    resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
+    resultSurf = BASICFONT.render('Score = %s' %(score), True, GREEN)
     resultRect = resultSurf.get_rect()
     resultRect.topleft = (postion, 25)
     SCREEN.blit(resultSurf, resultRect)

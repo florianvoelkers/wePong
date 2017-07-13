@@ -66,12 +66,11 @@ def endResult(player):
     exitMethod()
     return
 
-def checkCollision():
-    #print ("if player 2 crash")
-    #endResult(true)
-    #print ("if player 1 crash")
-    #endResult(false)
-    print("testcollsion")
+def checkCollision(playerside,player,tail):
+    for x in range(1, len(tail)):
+        if player.colliderect(tail[x]):
+            endResult(playerside)
+            print("collision")
 
 def countdown():
     global TRONSTART
@@ -141,14 +140,65 @@ def playerThread(connection,playerSide):
 def setupPlayer(playerSide):
     if playerSide:
         # linker player (1)
+        player = pygame.Rect(50,WINDOWHEIGHT / 2, LINETHICKNESS*3,LINETHICKNESS*5)
     else:
         # rechter player(2)
+        player = pygame.Rect(WINDOWWIDTH - 100,WINDOWHEIGHT / 2, LINETHICKNESS*3,LINETHICKNESS*5)
+    return player
 
-def movePlayer(player, playerSide):
-    global RIGHTPLAYERDIRECTION
+def movePlayer(player,xDir,yDir):
+        player.x + xDir
+        player.y + yDir
+    return player
+
+def applyDirection(playerSide,xDir,yDir):
     global LEFTPLAYERDIRECTION
+    global RIGHTPLAYERDIRECTION
 
+    newXDir,newYDir = xDir,newYDir
+    if playerSide:
+        direction = LEFTPLAYERDIRECTION
+        LEFTPLAYERDIRECTION = "none"
+    else:
+        direction = RIGHTPLAYERDIRECTION
+        RIGHTPLAYERDIRECTION = "none"
 
+    if direction == "right" and xDir == -1:
+        newXDir,newYDir = 0,-1
+    elif direction == "right" and xDir == 1:
+        newXDir,newYDir = 0,1
+    elif direction == "right" and yDir == -1:
+        newXDir,newYDir = 1,0
+    elif direction == "right" and yDir == 1:
+        newXDir,newYDir -1,0
+    
+    if direction == "left" and xDir == -1:
+        newXDir,newYDir = 0,1
+    elif direction == "left" and xDir == 1:
+        newXDir,newYDir = 0,-1
+    elif direction == "left" and yDir == -1:
+        newXDir,newYDir = -1,0
+    elif direction == "left" and yDir == 1:
+        newXDir,newYDir = 1,0
+
+    return newXDir, newYDir
+
+def drawPlayer(player,playerSide):
+    if player.bottom > WINDOWHEIGHT - LINETHICKNESS:
+        if playerSide:
+            endResult(False)
+        else:
+            endResult(True)
+    elif player.top < LINETHICKNESS:
+        if playerSide:
+            endResult(False)
+        else:
+            endResult(True)
+    if playerSide:
+        pygame.draw.rect(PONGSCREEN, ORANGE, player)
+    else:
+        pygame.draw.rect(PONGSCREEN, PINK, player)
+    return pygame.Rect(player.x,player.y,player.width,player.height)
 
 def main(connection1,connection2,callMenu):
     pygame.init()
@@ -174,8 +224,17 @@ def main(connection1,connection2,callMenu):
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()
 
-    TRONSCREEN.fill(DARKBLUE)
+    player1 = setupPlayer(True)
+    player2 = setupPlayer(False)
+    p1DirX = 1
+    p1DirY = 0
+    p2DirX = -1
+    p2DirY = 0
 
+    player1Tail = []
+    player2Tail = []
+
+    TRONSCREEN.fill(DARKBLUE)
     for x in range (0,15):
         pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (0, x*61, WINDOWWIDTH, LINETHICKNESS))
     for x in range(0,20):
@@ -184,7 +243,6 @@ def main(connection1,connection2,callMenu):
     countdown()
 
     while tronRunning:
-        
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -198,6 +256,15 @@ def main(connection1,connection2,callMenu):
             sys.exit()
 
         if TRONSTART:
+            player1Tail[len(player1Tail)+1] = drawPlayer(player1, True)
+            player2Tail[len(player2Tail)+1] = drawPlayer(player2, False)
+            checkCollision(player1, player2Tail)
+            checkCollision(player2, player1Tail)
+            p1DirX, p1DirY = applyDirection(True,p1DirX,p1DirY):
+            p2DirX, p2DirY = applyDirection(False, p2DirX, p2DirY):
+            player1 = movePlayer(player1, p1DirX, p1DirY)
+            player2 =movePlayer(player2, p2DirX, p2DirY)
+            
             print("TRONSTART")
 
         pygame.display.update()

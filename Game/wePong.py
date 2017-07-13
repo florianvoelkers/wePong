@@ -95,29 +95,29 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX, ballDirY):
         contactpoint = paddle1.top - ball.centery
         percent =(contactpoint / PADDLESIZE) +1
         if percent > 0.8:
-            newXDir, newYDir = 0.5, -1.5
+            newXDir, newYDir = 1, -3
         elif percent > 0.6:
-            newXDir, newYDir = 1.5, -0.5
+            newXDir, newYDir = 3, -1
         elif percent > 0.4:
             newXDir, newYDir = -1 * ballDirX, ballDirY
         elif percent > 0.2:
-            newXDir, newYDir = 1.5, 0.5
+            newXDir, newYDir = 3, 1
         else:
-            newXDir, newYDir = 0.5, 1.5
+            newXDir, newYDir = 1, 3
         return newXDir, newYDir            
     elif ballDirX > 0 and ball.colliderect(paddle2) and paddle2.colliderect(ball):
         contactpoint = paddle2.top - ball.centery
         percent =(contactpoint / PADDLESIZE) +1
         if percent > 0.8:
-            newXDir, newYDir = -0.5, -1.5
+            newXDir, newYDir = -1, -3
         elif percent > 0.6:
-            newXDir, newYDir = -1.5, -0.5
+            newXDir, newYDir = -3, -1
         elif percent > 0.4:
             newXDir, newYDir = -1 * ballDirX, ballDirY
         elif percent > 0.2:
-            newXDir, newYDir = -1.5, 0.5
+            newXDir, newYDir = -3, 1
         else:
-            newXDir, newYDir = -0.5, 1.5
+            newXDir, newYDir = -1, 3
         return newXDir, newYDir        
     else: 
         return ballDirX, ballDirY
@@ -199,7 +199,7 @@ def countdown():
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
-    if score > 1:
+    if score > 4:
         endResult(player)
     if player: 
         postion = 80 

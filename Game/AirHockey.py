@@ -27,7 +27,7 @@ BLUE = [52, 190, 196]
 GREEN = [0, 255, 0]
 
 MAXSPEED = 20
-DECREASESPEED = 0.06
+DECREASESPEED = 0.04
 
 AIRSTART = False
 AIREND = False
@@ -184,7 +184,7 @@ def endResult(player):
 
 # Anzeige des Spieler Scores
 def displayScore(player, score):
-    if score > 10:
+    if score > 2:
         endResult(player)
     if player: 
         postion = 80 
@@ -232,11 +232,11 @@ def playerThread(connection,playerSide):
     global RIGHTPLAYERCONNECTION
     
     if playerSide:
-        RIGHTPLAYERCONNECTED = True
-        RIGHTPLAYERCONNECTION = playerConnection
-    else:
         LEFTPLAYERCONNECTED = True
         LEFTPLAYERCONNECTION = playerConnection
+    else:
+        RIGHTPLAYERCONNECTED = True
+        RIGHTPLAYERCONNECTION = playerConnection
 
     while True:
         data = playerConnection.recv(1024)

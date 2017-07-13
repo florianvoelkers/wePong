@@ -80,6 +80,8 @@ def playerThread(connection,firstConnection,playernumber):
                 if game == "tron":
                     print ("starte Tron")
                     threading.Thread(target=Tron.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
+                    game,name = "",""
+                    exitMethod()
                 elif game == "air":
                     threading.Thread(target=AirHockey.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
                     print("Starte airhockey")
@@ -93,7 +95,7 @@ def playerThread(connection,firstConnection,playernumber):
                     exitMethod()
                     return
             elif player == "player2":
-                return
+                break
     return
 
 def serverThread():
@@ -160,7 +162,7 @@ def main():
     background = MENUSCREEN.blit(resizedImage, (0 , 0))
     while True:
         while menuRunning:
-            time.sleep(1)            
+            time.sleep(0.1)            
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()

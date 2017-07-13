@@ -35,6 +35,8 @@ TRONEND = False
 LEFTPLAYERDIRECTION = "none"
 RIGHTPLAYERDIRECTION = "none"
 
+MOVESPEED = 3
+
 
 def exitMethod():
     global tronRunning
@@ -57,9 +59,10 @@ def endResult(player):
     resultRect = resultSurf.get_rect()
     resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
     TRONSCREEN.blit(resultSurf, resultRect)
+    pygame.display.update()
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
-        if seconds>6:
+        if seconds>5:
             break
         if seconds >4:
             TRONEND = True
@@ -68,7 +71,7 @@ def endResult(player):
 
 def checkCollision(playerside,player,tail):
     for x in range(1, len(tail)):
-        if player.colliderect(tail[x]):
+        if player.colliderect(tail[x]) and x < len(tail)-22:
             endResult(playerside)
             print("collision")
 
@@ -100,7 +103,6 @@ def countdown():
             resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
             TRONSCREEN.blit(resultSurf,resultRect)
             pygame.display.update()
-    endResult(True)
     return
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
@@ -113,37 +115,41 @@ def playerThread(connection,playerSide):
     global RIGHTPLAYERCONNECTION
     global RIGHTPLAYERDIRECTION
     global LEFTPLAYERDIRECTION
+    global tronRunning
     
     if playerSide:
-        RIGHTPLAYERCONNECTED = True
-        RIGHTPLAYERCONNECTION = playerConnection
-    else:
         LEFTPLAYERCONNECTED = True
         LEFTPLAYERCONNECTION = playerConnection
+    else:
+        RIGHTPLAYERCONNECTED = True
+        RIGHTPLAYERCONNECTION = playerConnection
 
-    while True:
+    while tronRunning:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
             name,direction = data.split (":")
             if name != "game":
                 if playerSide:
-                    RIGHTPLAYERDIRECTION = direction
+                    if direction == "left" or direction == "right":
+                        print("direction player 1",direction)
+                        LEFTPLAYERDIRECTION = direction
                 else:
-                    LEFTPLAYERDIRECTION = direction
-        if TRONEND:
-            print ("send end")
-            playerConnection.send("end\n")
-            print ("end sended")
-            break
+                    if direction == "left" or direction == "right":
+                        RIGHTPLAYERDIRECTION = direction
+                        print("direction player 2",direction)
+                        
+    print ("send end")
+    playerConnection.send("end\n")
+    print ("end sended")
     return
 
 def setupPlayer(playerSide):
     if playerSide:
         # linker player (1)
-        player = pygame.Rect(50,WINDOWHEIGHT / 2, LINETHICKNESS*3,LINETHICKNESS*5)
+        player = pygame.Rect(50,WINDOWHEIGHT / 2, LINETHICKNESS*5,LINETHICKNESS*5)
     else:
         # rechter player(2)
-        player = pygame.Rect(WINDOWWIDTH - 100,WINDOWHEIGHT / 2, LINETHICKNESS*3,LINETHICKNESS*5)
+        player = pygame.Rect(WINDOWWIDTH - 100,WINDOWHEIGHT / 2, LINETHICKNESS*5,LINETHICKNESS*5)
     return player
 
 def movePlayer(player,xDir,yDir):
@@ -155,7 +161,7 @@ def applyDirection(playerSide,xDir,yDir):
     global LEFTPLAYERDIRECTION
     global RIGHTPLAYERDIRECTION
 
-    newXDir,newYDir = xDir,newYDir
+    newXDir,newYDir = xDir,yDir
     if playerSide:
         direction = LEFTPLAYERDIRECTION
         LEFTPLAYERDIRECTION = "none"
@@ -163,23 +169,23 @@ def applyDirection(playerSide,xDir,yDir):
         direction = RIGHTPLAYERDIRECTION
         RIGHTPLAYERDIRECTION = "none"
 
-    if direction == "right" and xDir == -1:
-        newXDir,newYDir = 0,-1
-    elif direction == "right" and xDir == 1:
-        newXDir,newYDir = 0,1
-    elif direction == "right" and yDir == -1:
-        newXDir,newYDir = 1,0
-    elif direction == "right" and yDir == 1:
-        newXDir,newYDir -1,0
-    
-    if direction == "left" and xDir == -1:
-        newXDir,newYDir = 0,1
-    elif direction == "left" and xDir == 1:
-        newXDir,newYDir = 0,-1
-    elif direction == "left" and yDir == -1:
-        newXDir,newYDir = -1,0
-    elif direction == "left" and yDir == 1:
-        newXDir,newYDir = 1,0
+    if direction == "right" and xDir == -MOVESPEED:
+        newXDir,newYDir = 0,-MOVESPEED
+    elif direction == "right" and xDir == MOVESPEED:
+        newXDir,newYDir = 0,MOVESPEED
+    elif direction == "right" and yDir == -MOVESPEED:
+        newXDir,newYDir = MOVESPEED,0
+    elif direction == "right" and yDir == MOVESPEED:
+        newXDir,newYDir=-MOVESPEED,0
+        
+    if direction == "left" and xDir == -MOVESPEED:
+        newXDir,newYDir = 0,MOVESPEED
+    elif direction == "left" and xDir == MOVESPEED:
+        newXDir,newYDir = 0,-MOVESPEED
+    elif direction == "left" and yDir == -MOVESPEED:
+        newXDir,newYDir = -MOVESPEED,0
+    elif direction == "left" and yDir == MOVESPEED:
+        newXDir,newYDir = MOVESPEED,0
 
     return newXDir, newYDir
 
@@ -195,9 +201,9 @@ def drawPlayer(player,playerSide):
         else:
             endResult(True)
     if playerSide:
-        pygame.draw.rect(PONGSCREEN, ORANGE, player)
+        pygame.draw.rect(TRONSCREEN, ORANGE, player)
     else:
-        pygame.draw.rect(PONGSCREEN, PINK, player)
+        pygame.draw.rect(TRONSCREEN, PINK, player)
     return pygame.Rect(player.x,player.y,player.width,player.height)
 
 def main(connection1,connection2,callMenu):
@@ -208,7 +214,7 @@ def main(connection1,connection2,callMenu):
     tronRunning = True
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
-    TRONSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
+    TRONSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))# ,pygame.FULLSCREEN)    
     pygame.display.set_caption('wePong')
 
     FPSCLOCK = pygame.time.Clock()
@@ -226,9 +232,9 @@ def main(connection1,connection2,callMenu):
 
     player1 = setupPlayer(True)
     player2 = setupPlayer(False)
-    p1DirX = 1
+    p1DirX = MOVESPEED
     p1DirY = 0
-    p2DirX = -1
+    p2DirX = -MOVESPEED
     p2DirY = 0
 
     player1Tail = []
@@ -256,17 +262,17 @@ def main(connection1,connection2,callMenu):
             sys.exit()
 
         if TRONSTART:
-            player1Tail[len(player1Tail)+1] = drawPlayer(player1, True)
-            player2Tail[len(player2Tail)+1] = drawPlayer(player2, False)
-            checkCollision(player1, player2Tail)
-            checkCollision(player2, player1Tail)
+            player1Tail.append(drawPlayer(player1, True))
+            player2Tail.append(drawPlayer(player2, False))
+            checkCollision(True,player1, player2Tail)
+            checkCollision(False,player1, player1Tail)
+            checkCollision(False,player2, player1Tail)
+            checkCollision(True,player2, player2Tail)
             p1DirX, p1DirY = applyDirection(True,p1DirX,p1DirY)
             p2DirX, p2DirY = applyDirection(False, p2DirX, p2DirY)
             player1 = movePlayer(player1, p1DirX, p1DirY)
             player2 = movePlayer(player2, p2DirX, p2DirY)
             
-            print("TRONSTART")
-
         pygame.display.update()
         FPSCLOCK.tick(FPS)
     callMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)

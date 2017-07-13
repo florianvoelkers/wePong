@@ -326,7 +326,6 @@ def main(connection1,connection2,callMenu):
             sys.exit()
 
         if GAMESTART:
-            print ("Gamestarttrue")
             drawArena(False)
             drawPuck(puck)
             bat1 = drawBat(True)

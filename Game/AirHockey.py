@@ -339,6 +339,7 @@ def main(connection1,connection2):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    return
 
 if __name__=='__main__':
     main()

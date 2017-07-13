@@ -77,17 +77,14 @@ def playerThread(connection,firstConnection,playernumber):
                 if game == "tron":
                     print ("starte Tron")
                 elif game == "air":
-                    AirHockey.main(PLAYER1CONNECTION,PLAYER2CONNECTION)
+                    threading.Thread(target=AirHockey.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
                     print("Starte airhockey")
                     game,name = "",""
                     break
                 elif game == "pong":
-                    print("Starte wepong", game,name,player)
-                    
+                    print("Starte wepong", game,name,player)  
                     threading.Thread(target=WePong.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
-
-                    game,name = "",""
-                    
+                    game,name = "","" 
                     break
             elif player == "player2" and GAMESTART:
                 break
@@ -166,10 +163,10 @@ def backToMenu(connection1,connection2):
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            else:
-                
-                pygame.display.update()
-                FPSCLOCK.tick(FPS)
+                return
+        MENUSCREEN.blit(resizedImage, (0 , 0))
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 def main():
     pygame.init()
@@ -214,6 +211,7 @@ def main():
             pygame.quit()
             sys.exit()
             return
+        MENUSCREEN.blit(resizedImage, (0 , 0))
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 

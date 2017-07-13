@@ -36,8 +36,8 @@ LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
 RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
 
 def exitMethod():
-    global running
-    running = False
+    global airRunning
+    airRunning = False
     #pygame.quit()
     #sys.exit()
 
@@ -265,8 +265,8 @@ def main(connection1,connection2,callMenu):
     global PUCKIMAGE
     global BATIMAGE
     global BATMASK
-    global running
-    running = True
+    global airRunning
+    airRunning = True
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     AIRSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
@@ -309,7 +309,7 @@ def main(connection1,connection2,callMenu):
 
     countdown()
 
-    while running:
+    while airRunning:
         
         for event in pygame.event.get():
             if event.type == QUIT:

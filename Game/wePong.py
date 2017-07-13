@@ -44,8 +44,8 @@ RIGHTPLAYERCONNECTED = False
 
 
 def exitMethod():
-    global running
-    running = False
+    global pongRunning
+    pongRunning = False
     #pygame.quit()
     #sys.exit()
 
@@ -254,13 +254,13 @@ def main(connection1,connection2,callMenu):
     global PONGSCREEN
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
-    global running
+    global pongRunning
     global PONGEND
     global menuInstance
 
     print ("main aufruf","-------------------------------")
 
-    running = True
+    pongRunning = True
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
     BASICFONTSIZE = 50
@@ -318,7 +318,7 @@ def main(connection1,connection2,callMenu):
     countdown()
     
     print (score1,score2,PONGEND,"-------------------------------")
-    while running:
+    while pongRunning:
         
         for event in pygame.event.get():
             if event.type == QUIT:

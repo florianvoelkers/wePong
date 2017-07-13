@@ -34,8 +34,8 @@ TRONEND = False
 
 
 def exitMethod():
-    global running
-    running = False
+    global tronRunning
+    tronRunning = False
     #pygame.quit()
     #sys.exit()
 
@@ -139,8 +139,8 @@ def main(connection1,connection2,callMenu):
     pygame.init()
 
     global TRONSCREEN
-    global running
-    running = True
+    global tronRunning
+    tronRunning = True
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     TRONSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
@@ -169,7 +169,7 @@ def main(connection1,connection2,callMenu):
 
     countdown()
 
-    while running:
+    while tronRunning:
         
         for event in pygame.event.get():
             if event.type == QUIT:

@@ -36,7 +36,8 @@ LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
 RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
 
 def exitMethod():
-    Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
+    global running
+    running = False
     #pygame.quit()
     #sys.exit()
 
@@ -178,7 +179,7 @@ def endResult(player):
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
         if seconds>6:
             break
-        if seconds >2:
+        if seconds >4:
             GAMEEND = True
     exitMethod()
     return
@@ -259,13 +260,15 @@ def playerThread(connection,playerSide):
     return
 
 
-def main(connection1,connection2):
+def main(connection1,connection2,callMenu):
     pygame.init()
 
     global AIRSCREEN
     global PUCKIMAGE
     global BATIMAGE
     global BATMASK
+    global running
+    running = True
 
     # Display Objekt erstellen auf dem dann alles dargestellt wird
     AIRSCREEN = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT))#, pygame.FULLSCREEN)    
@@ -308,7 +311,7 @@ def main(connection1,connection2):
 
     countdown()
 
-    while True:
+    while running:
         
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -339,6 +342,7 @@ def main(connection1,connection2):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    callMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
     return
 
 if __name__=='__main__':

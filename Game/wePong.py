@@ -5,7 +5,7 @@ from pygame.locals import *
 import random
 import socket
 import threading
-import Menu
+#import Menu
 import os
 import time
 
@@ -46,7 +46,6 @@ RIGHTPLAYERCONNECTED = False
 def exitMethod():
     global running
     running = False
-    Menu.backToMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
     #pygame.quit()
     #sys.exit()
 
@@ -251,7 +250,7 @@ def playerThread(connection,playerSide):
             break
     return
 
-def main(connection1,connection2):
+def main(connection1,connection2,callMenu):
     pygame.init()
 
     global PONGSCREEN
@@ -259,8 +258,9 @@ def main(connection1,connection2):
     global LEFTPADDLESPEED
     global running
     global GAMEEND
-    
-    print ("main aufruf",running,GAMEEND,"-------------------------------")
+    global menuInstance
+
+    print ("main aufruf","-------------------------------")
 
     running = True
     # Einstellungen der Schriftart
@@ -359,6 +359,8 @@ def main(connection1,connection2):
         pygame.display.update()
         FPSCLOCK.tick(FPS)
     print("wepong ende!")
+    callMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
+    print("nach call menu")
     return
 
 if __name__=='__main__':

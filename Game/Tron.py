@@ -23,8 +23,11 @@ LINETHICKNESS = 20
 # Farben vor definieren
 WHITE = [255, 255, 255]
 RED = [198,61,61]
-BLUE = [52, 190, 196]
+LIGHTBLUE = [52, 190, 196]
+DARKBLUE = [48,98,99]
 GREEN = [0, 255, 0]
+PINK = [252,0,143]
+ORANGE = [255,136,0]
 
 GAMESTART = False
 GAMEEND = False
@@ -40,8 +43,6 @@ def exitMethod():
 def endResult(player):
     global GAMEEND
     global GAMESTART
-    global LEFTPLAYERCONNECTION
-    global RIGHTPLAYERCONNECTION
     
     GAMESTART = False
     start_ticks=pygame.time.get_ticks()
@@ -62,19 +63,11 @@ def endResult(player):
     exitMethod()
     return
 
-# Anzeige des Spieler Scores
-def displayScore(player, score):
-    if score > 10:
-        endResult(player)
-    if player: 
-        postion = 80 
-    else:
-        postion = WINDOWWIDTH - 280 
-
-    resultSurf = BASICFONT.render('Score = %s' %(score), True, WHITE)
-    resultRect = resultSurf.get_rect()
-    resultRect.topleft = (postion, 25)
-    AIRSCREEN.blit(resultSurf, resultRect)
+def checkCollision()
+    #print ("if player 2 crash")
+    #endResult(true)
+    #print ("if player 1 crash")
+    #endResult(false)
 
 def countdown():
     global GAMESTART
@@ -105,8 +98,6 @@ def playerThread(connection,playerSide):
     playerConnection = connection
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
-    global LEFTBATPOSITION
-    global RIGHTBATPOSITION
     global GAMEEND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
@@ -141,9 +132,6 @@ def main(connection1,connection2,callMenu):
     pygame.init()
 
     global AIRSCREEN
-    global PUCKIMAGE
-    global BATIMAGE
-    global BATMASK
     global running
     running = True
 
@@ -160,9 +148,6 @@ def main(connection1,connection2,callMenu):
     global  WINNERFONT, WINNERFONTSIZE
     WINNERFONTSIZE = 100
     WINNERFONT = pygame.font.Font(os.path.join("/home/pi/Desktop/Game/Font",'ARCADE.TTF'), WINNERFONTSIZE)
-
-    score1 = 0
-    score2 = 0
 
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()

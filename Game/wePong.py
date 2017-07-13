@@ -152,8 +152,6 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
 def endResult(player):
     global GAMEEND
     global GAMESTART
-    global LEFTPLAYERCONNECTION
-    global RIGHTPLAYERCONNECTION
     GAMESTART = False
 
     start_ticks=pygame.time.get_ticks()

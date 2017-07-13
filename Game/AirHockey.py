@@ -162,8 +162,6 @@ def drawBat(player1):
 def endResult(player):
     global GAMEEND
     global GAMESTART
-    global LEFTPLAYERCONNECTION
-    global RIGHTPLAYERCONNECTION
     
     GAMESTART = False
     start_ticks=pygame.time.get_ticks()

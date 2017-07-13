@@ -18,7 +18,7 @@ FPS = 60
 WINDOWWIDTH = 1824
 WINDOWHEIGHT = 984
 
-LINETHICKNESS = 20
+LINETHICKNESS = 4
 
 # Farben vor definieren
 WHITE = [255, 255, 255]
@@ -29,8 +29,8 @@ GREEN = [0, 255, 0]
 PINK = [252,0,143]
 ORANGE = [255,136,0]
 
-GAMESTART = False
-GAMEEND = False
+TRONSTART = False
+TRONEND = False
 
 
 def exitMethod():
@@ -41,10 +41,10 @@ def exitMethod():
 
 
 def endResult(player):
-    global GAMEEND
-    global GAMESTART
+    global TRONEND
+    global TRONSTART
     
-    GAMESTART = False
+    TRONSTART = False
     start_ticks=pygame.time.get_ticks()
     if player:
         resultSurf = WINNERFONT.render("Player 1 Won!", True, WHITE)
@@ -53,31 +53,38 @@ def endResult(player):
 
     resultRect = resultSurf.get_rect()
     resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
-    AIRSCREEN.blit(resultSurf, resultRect)
+    TRONSCREEN.blit(resultSurf, resultRect)
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/300 
         if seconds>6:
             break
         if seconds >4:
-            GAMEEND = True
+            TRONEND = True
     exitMethod()
     return
 
-def checkCollision()
+def checkCollision():
     #print ("if player 2 crash")
     #endResult(true)
     #print ("if player 1 crash")
     #endResult(false)
+    print("testcollsion")
 
 def countdown():
-    global GAMESTART
+    global TRONSTART
     start_ticks=pygame.time.get_ticks()
 
-    while GAMESTART == False: 
-        seconds=(pygame.time.get_ticks()-start_ticks)/1000 
-        drawArena(False)
+    while TRONSTART == False: 
+        seconds=(pygame.time.get_ticks()-start_ticks)/1000
+        TRONSCREEN.fill(DARKBLUE)
+
+        for x in range (0,15):
+            pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (0, x*61, WINDOWWIDTH, LINETHICKNESS))
+        for x in range(0,20):
+            pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (x*91, 0, LINETHICKNESS,WINDOWWIDTH))
+
         if seconds>3:
-            GAMESTART = True
+            TRONSTART = True
         elif seconds > 2:
             resultSurf = WINNERFONT.render("1", True, WHITE)
             resultRect = resultSurf.get_rect()
@@ -87,9 +94,9 @@ def countdown():
         else: 
             resultSurf = WINNERFONT.render("3", True, WHITE)
             resultRect = resultSurf.get_rect()
-        if not GAMESTART:
+        if not TRONSTART:
             resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
-            AIRSCREEN.blit(resultSurf,resultRect)
+            TRONSCREEN.blit(resultSurf,resultRect)
             pygame.display.update()
     return
 
@@ -98,7 +105,7 @@ def playerThread(connection,playerSide):
     playerConnection = connection
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
-    global GAMEEND
+    global TRONEND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
     
@@ -119,7 +126,7 @@ def playerThread(connection,playerSide):
                     print ("player 1 eingabe uebernemen")
                 else:
                     print("player 2 eingeaber ueabernehmen")
-        if GAMEEND:
+        if TRONEND:
             print ("send end")
             playerConnection.send("end\n")
             playerConnection.send("theEnd")
@@ -131,7 +138,7 @@ def playerThread(connection,playerSide):
 def main(connection1,connection2,callMenu):
     pygame.init()
 
-    global AIRSCREEN
+    global TRONSCREEN
     global running
     running = True
 
@@ -152,6 +159,14 @@ def main(connection1,connection2,callMenu):
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()
 
+    TRONSCREEN.fill(DARKBLUE)
+
+    for x in range (0,15):
+        pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (0, x*61, WINDOWWIDTH, LINETHICKNESS))
+    for x in range(0,20):
+        pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (x*91, 0, LINETHICKNESS,WINDOWWIDTH))
+
+
     countdown()
 
     while running:
@@ -168,7 +183,8 @@ def main(connection1,connection2,callMenu):
             pygame.quit()
             sys.exit()
 
-        if GAMESTART:
+        if TRONSTART:
+            print("TRONSTART")
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)

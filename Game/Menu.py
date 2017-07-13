@@ -10,6 +10,7 @@ import os
 import inspect
 import WePong
 import AirHockey
+import Tron
 import time
 
 
@@ -30,7 +31,7 @@ BLACK = [0,0,0]
 
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
-GAMESTART = False
+MENUSTART = False
 PLAYER1CONNECTION = 0
 PLAYER1CONNECTION = 0
 
@@ -47,7 +48,7 @@ def playerThread(connection,firstConnection,playernumber):
     global PLAYER2CONNECTION 
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
-    global GAMESTART
+    global MENUSTART
 
     player = ""
     if firstConnection:
@@ -69,15 +70,16 @@ def playerThread(connection,firstConnection,playernumber):
             player = "player2"
     
     while True:
-        print("warte")
+        #print("warte")
         data = connection.recv(1024)
-        print("daten bekommen",data)
+        #print("daten bekommen",data)
         if data.count(":") == 1:
             name, game = data.split (":")
             print(player,name,game)
-            if player == "player1" and GAMESTART:
+            if player == "player1" and MENUSTART:
                 if game == "tron":
                     print ("starte Tron")
+                    threading.Thread(target=Tron.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
                 elif game == "air":
                     threading.Thread(target=AirHockey.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
                     print("Starte airhockey")
@@ -97,7 +99,7 @@ def playerThread(connection,firstConnection,playernumber):
 def serverThread():
     # Socket das auf die Verbindung der beiden Spieler wartet und dann Threads
     # fuer die jeweiligen Spieler startet
-    global GAMESTART
+    global MENUSTART
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
     print("ServerThread startet")
@@ -117,7 +119,7 @@ def serverThread():
         threading.Thread(target=playerThread, args=(connection,True,0)).start()
     while True:
         if LEFTPLAYERCONNECTED and RIGHTPLAYERCONNECTED:
-            GAMESTART = True
+            MENUSTART = True
             break
     return
 
@@ -158,9 +160,7 @@ def main():
     background = MENUSCREEN.blit(resizedImage, (0 , 0))
     while True:
         while menuRunning:
-            time.sleep(1)
-            print("lueppt")
-            
+            time.sleep(1)            
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()

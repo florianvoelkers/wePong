@@ -37,8 +37,8 @@ PADDLELOWERPOSITION = (WINDOWHEIGHT/4) * 2 - 44
 
 LEFTPADDLESPEED = 0
 RIGHTPADDLESPEED = 0
-GAMEEND = False
-GAMESTART = False
+PONGEND = False
+PONGSTART = False
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
 
@@ -150,9 +150,9 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         else: return (score,ball,ballDirX,ballDirY)
 
 def endResult(player):
-    global GAMEEND
-    global GAMESTART
-    GAMESTART = False
+    global PONGEND
+    global PONGSTART
+    PONGSTART = False
 
     start_ticks=pygame.time.get_ticks()
     if player:
@@ -169,19 +169,19 @@ def endResult(player):
         if seconds>5:
             break    	    
         if seconds >4:
-            GAMEEND = True
+            PONGEND = True
     exitMethod()
     return
 
 def countdown():
-    global GAMESTART
+    global PONGSTART
     start_ticks=pygame.time.get_ticks()
 
-    while GAMESTART == False: 
+    while PONGSTART == False: 
         seconds=(pygame.time.get_ticks()-start_ticks)/1000 
         drawArena()
         if seconds>3:
-            GAMESTART = True
+            PONGSTART = True
         elif seconds > 2:
             resultSurf = WINNERFONT.render("1", True, WHITE)
             resultRect = resultSurf.get_rect()
@@ -191,7 +191,7 @@ def countdown():
         else: 
             resultSurf = WINNERFONT.render("3", True, WHITE)
             resultRect = resultSurf.get_rect()
-        if not GAMESTART:
+        if not PONGSTART:
             resultRect.topleft = (WINDOWWIDTH/2 - 25, WINDOWHEIGHT/2-50)
             PONGSCREEN.blit(resultSurf, resultRect)
             pygame.display.update()
@@ -220,7 +220,7 @@ def playerThread(connection,playerSide):
     global LEFTPADDLESPEED
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
-    global GAMEEND
+    global PONGEND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
 
@@ -241,7 +241,7 @@ def playerThread(connection,playerSide):
                     LEFTPADDLESPEED = int(newSpeed)
                 else:
                     RIGHTPADDLESPEED = int(newSpeed)
-        if GAMEEND:
+        if PONGEND:
             print ("send end")
             playerConnection.send("end\n")
             print ("end sended")
@@ -255,7 +255,7 @@ def main(connection1,connection2,callMenu):
     global RIGHTPADDLESPEED
     global LEFTPADDLESPEED
     global running
-    global GAMEEND
+    global PONGEND
     global menuInstance
 
     print ("main aufruf","-------------------------------")
@@ -278,7 +278,7 @@ def main(connection1,connection2,callMenu):
 
     score1 = 0
     score2 = 0
-    GAMEEND = False
+    PONGEND = False
 
     # Spielflaeche in einer Farbe
     PONGSCREEN.fill(BLUE)
@@ -317,7 +317,7 @@ def main(connection1,connection2,callMenu):
     
     countdown()
     
-    print (score1,score2,GAMEEND,"-------------------------------")
+    print (score1,score2,PONGEND,"-------------------------------")
     while running:
         
         for event in pygame.event.get():
@@ -332,7 +332,7 @@ def main(connection1,connection2,callMenu):
             pygame.quit()
             sys.exit()
             
-        if GAMESTART:
+        if PONGSTART:
 
             # Steuerung linker Schlaeger mit Handydaten
             paddle1.y = paddle1.y + LEFTPADDLESPEED

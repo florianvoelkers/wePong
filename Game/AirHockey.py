@@ -29,8 +29,8 @@ GREEN = [0, 255, 0]
 MAXSPEED = 20
 DECREASESPEED = 0.06
 
-GAMESTART = False
-GAMEEND = False
+AIRSTART = False
+AIREND = False
 
 LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
 RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
@@ -160,10 +160,10 @@ def drawBat(player1):
     return bat
 
 def endResult(player):
-    global GAMEEND
-    global GAMESTART
+    global AIREND
+    global AIRSTART
     
-    GAMESTART = False
+    AIRSTART = False
     start_ticks=pygame.time.get_ticks()
     if player:
         resultSurf = WINNERFONT.render("Player 1 Won!", True, WHITE)
@@ -178,7 +178,7 @@ def endResult(player):
         if seconds>6:
             break
         if seconds >4:
-            GAMEEND = True
+            AIREND = True
     exitMethod()
     return
 
@@ -197,14 +197,14 @@ def displayScore(player, score):
     AIRSCREEN.blit(resultSurf, resultRect)
 
 def countdown():
-    global GAMESTART
+    global AIRSTART
     start_ticks=pygame.time.get_ticks()
 
-    while GAMESTART == False: 
+    while AIRSTART == False: 
         seconds=(pygame.time.get_ticks()-start_ticks)/1000 
         drawArena(False)
         if seconds>3:
-            GAMESTART = True
+            AIRSTART = True
         elif seconds > 2:
             resultSurf = WINNERFONT.render("1", True, WHITE)
             resultRect = resultSurf.get_rect()
@@ -214,7 +214,7 @@ def countdown():
         else: 
             resultSurf = WINNERFONT.render("3", True, WHITE)
             resultRect = resultSurf.get_rect()
-        if not GAMESTART:
+        if not AIRSTART:
             resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
             AIRSCREEN.blit(resultSurf,resultRect)
             pygame.display.update()
@@ -227,7 +227,7 @@ def playerThread(connection,playerSide):
     global RIGHTPLAYERCONNECTED
     global LEFTBATPOSITION
     global RIGHTBATPOSITION
-    global GAMEEND
+    global AIREND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
     
@@ -249,7 +249,7 @@ def playerThread(connection,playerSide):
                     LEFTBATPOSITION = newX * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * newY
                 else:
                     RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
-        if GAMEEND:
+        if AIREND:
             print ("send end")
             playerConnection.send("end\n")
             playerConnection.send("theEnd")
@@ -323,7 +323,7 @@ def main(connection1,connection2,callMenu):
             pygame.quit()
             sys.exit()
 
-        if GAMESTART:
+        if AIRSTART:
             drawArena(False)
             drawPuck(puck)
             bat1 = drawBat(True)

@@ -32,6 +32,9 @@ ORANGE = [255,136,0]
 TRONSTART = False
 TRONEND = False
 
+LEFTPLAYERDIRECTION = "none"
+RIGHTPLAYERDIRECTION = "none"
+
 
 def exitMethod():
     global tronRunning
@@ -98,6 +101,7 @@ def countdown():
             resultRect.center = (WINDOWWIDTH/2, WINDOWHEIGHT/2)
             TRONSCREEN.blit(resultSurf,resultRect)
             pygame.display.update()
+    endResult(True)
     return
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
@@ -108,6 +112,8 @@ def playerThread(connection,playerSide):
     global TRONEND
     global LEFTPLAYERCONNECTION
     global RIGHTPLAYERCONNECTION
+    global RIGHTPLAYERDIRECTION
+    global LEFTPLAYERDIRECTION
     
     if playerSide:
         RIGHTPLAYERCONNECTED = True
@@ -119,20 +125,29 @@ def playerThread(connection,playerSide):
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
-            x,y = data.split (":")
-            if x != "game":
-
+            name:direction = data.split (":")
+            if name != "game":
                 if playerSide:
-                    print ("player 1 eingabe uebernemen")
+                    RIGHTPLAYERDIRECTION = direction
                 else:
-                    print("player 2 eingeaber ueabernehmen")
+                    LEFTPLAYERDIRECTION = direction
         if TRONEND:
             print ("send end")
             playerConnection.send("end\n")
-            playerConnection.send("theEnd")
             print ("end sended")
             break
     return
+
+def setupPlayer(playerSide):
+    if playerSide:
+        # linker player (1)
+    else:
+        # rechter player(2)
+
+def movePlayer(player, playerSide):
+    global RIGHTPLAYERDIRECTION
+    global LEFTPLAYERDIRECTION
+
 
 
 def main(connection1,connection2,callMenu):
@@ -165,7 +180,6 @@ def main(connection1,connection2,callMenu):
         pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (0, x*61, WINDOWWIDTH, LINETHICKNESS))
     for x in range(0,20):
         pygame.draw.rect(TRONSCREEN, LIGHTBLUE, (x*91, 0, LINETHICKNESS,WINDOWWIDTH))
-
 
     countdown()
 

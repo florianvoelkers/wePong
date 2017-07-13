@@ -252,7 +252,6 @@ def playerThread(connection,playerSide):
         if AIREND:
             print ("send end")
             playerConnection.send("end\n")
-            playerConnection.send("theEnd")
             print ("end sended")
             break
     return

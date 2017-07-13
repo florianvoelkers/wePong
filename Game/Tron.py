@@ -124,7 +124,7 @@ def playerThread(connection,playerSide):
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
-            name:direction = data.split (":")
+            name,direction = data.split (":")
             if name != "game":
                 if playerSide:
                     RIGHTPLAYERDIRECTION = direction
@@ -147,8 +147,8 @@ def setupPlayer(playerSide):
     return player
 
 def movePlayer(player,xDir,yDir):
-        player.x + xDir
-        player.y + yDir
+    player.x += xDir
+    player.y += yDir
     return player
 
 def applyDirection(playerSide,xDir,yDir):
@@ -260,10 +260,10 @@ def main(connection1,connection2,callMenu):
             player2Tail[len(player2Tail)+1] = drawPlayer(player2, False)
             checkCollision(player1, player2Tail)
             checkCollision(player2, player1Tail)
-            p1DirX, p1DirY = applyDirection(True,p1DirX,p1DirY):
-            p2DirX, p2DirY = applyDirection(False, p2DirX, p2DirY):
+            p1DirX, p1DirY = applyDirection(True,p1DirX,p1DirY)
+            p2DirX, p2DirY = applyDirection(False, p2DirX, p2DirY)
             player1 = movePlayer(player1, p1DirX, p1DirY)
-            player2 =movePlayer(player2, p2DirX, p2DirY)
+            player2 = movePlayer(player2, p2DirX, p2DirY)
             
             print("TRONSTART")
 

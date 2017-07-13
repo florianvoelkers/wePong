@@ -170,8 +170,8 @@ def endResult(player):
     while True: 
         seconds=(pygame.time.get_ticks()-start_ticks)/1000 
         if seconds>5:
-            break
-        if seconds >2:
+            break    	    
+        if seconds >4:
             GAMEEND = True
     exitMethod()
     return
@@ -260,6 +260,8 @@ def main(connection1,connection2):
     global running
     global GAMEEND
     
+    print ("main aufruf",running,GAMEEND,"-------------------------------")
+
     running = True
     # Einstellungen der Schriftart
     global BASICFONT, BASICFONTSIZE
@@ -317,6 +319,7 @@ def main(connection1,connection2):
     
     countdown()
     
+    print (score1,score2,GAMEEND,"-------------------------------")
     while running:
         
         for event in pygame.event.get():

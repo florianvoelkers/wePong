@@ -80,15 +80,16 @@ def playerThread(connection,firstConnection,playernumber):
                     threading.Thread(target=AirHockey.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
                     print("Starte airhockey")
                     game,name = "",""
+                    exitMethod()
                     break
                 elif game == "pong":
                     print("Starte wepong", game,name,player)  
                     threading.Thread(target=WePong.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION)).start()
-                    game,name = "","" 
+                    game,name = "",""
+                    exitMethod()
                     break
-            elif player == "player2" and GAMESTART:
+            elif player == "player2":
                 break
-    exitMethod()
     return
 
 def serverThread():
@@ -167,6 +168,7 @@ def backToMenu(connection1,connection2):
         MENUSCREEN.blit(resizedImage, (0 , 0))
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    return
 
 def main():
     pygame.init()
@@ -214,6 +216,7 @@ def main():
         MENUSCREEN.blit(resizedImage, (0 , 0))
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+    print("menu ende---------------------------------------")
 
 if __name__=='__main__':
     main()

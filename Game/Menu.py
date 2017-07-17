@@ -2,12 +2,9 @@
 
 import pygame, sys
 from pygame.locals import *
-import random
 import socket
 import threading
-import subprocess
 import os
-import inspect
 import WePong
 import AirHockey
 import Tron
@@ -35,12 +32,10 @@ MENUSTART = False
 PLAYER1CONNECTION = 0
 PLAYER1CONNECTION = 0
 
-def exitMethod():
+# Diese Methode setzt die menuRunning Variable auf False wodurch die Funktionen in der Menu Schleife nicht mehr aufgerufen werden
+def pauseMenu():
     global menuRunning
     menuRunning = False
-    #pygame.quit()
-    #sys.exit()
-
 
 # Thread um die gesendeten Daten der Spielers auszuwerten
 def playerThread(connection,firstConnection,playernumber):
@@ -50,6 +45,7 @@ def playerThread(connection,firstConnection,playernumber):
     global RIGHTPLAYERCONNECTED
     global MENUSTART
 
+    # In dieser Abfrage werden die neuen Verbindungen zu den Spielern entsprechenden globalen Variablen zugewiesen
     player = ""
     if firstConnection:
         data = connection.recv(1024)
@@ -69,10 +65,11 @@ def playerThread(connection,firstConnection,playernumber):
             PLAYER2CONNECTION = connection
             player = "player2"
     
+    # Schleife in der die Eingegebenen Daten der Spieler ausgewertet werden
+    # Spieler 1 kann ein Spiel aussuchen
+    # Bei Spieler 2 wird die Schleife beendet weil er keine Berechtigung hat ein Spiel auszuwaehlen
     while True:
-        #print("warte")
         data = connection.recv(1024)
-        #print("daten bekommen",data)
         if data.count(":") == 1:
             name, game = data.split (":")
             print(player,name,game)
@@ -80,19 +77,15 @@ def playerThread(connection,firstConnection,playernumber):
                 if game == "tron":
                     print ("starte Tron")
                     threading.Thread(target=Tron.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
-                    game,name = "",""
-                    exitMethod()
+                    pauseMenu()
                 elif game == "air":
                     threading.Thread(target=AirHockey.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
-                    print("Starte airhockey")
-                    game,name = "",""
-                    exitMethod()
+                    pauseMenu()
                     return
                 elif game == "pong":
                     print("Starte wepong", game,name,player)  
                     threading.Thread(target=WePong.main, args=(PLAYER1CONNECTION,PLAYER2CONNECTION,resumeMenu)).start()
-                    game,name = "",""
-                    exitMethod()
+                    pauseMenu()
                     return
             elif player == "player2":
                 break
@@ -104,14 +97,12 @@ def serverThread():
     global MENUSTART
     global LEFTPLAYERCONNECTED
     global RIGHTPLAYERCONNECTED
-    print("ServerThread startet")
 
     gameSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = ""
     port=5000
     gameSocket.bind((host,port))
     gameSocket.listen(5)
-    print("socket hoert zu")
     playerCount = 0
     while playerCount < 2:
         print ("waiting for", 2-playerCount ,"connection(s)")
@@ -126,12 +117,12 @@ def serverThread():
     return
 
 
+# Diese Methode wird mit den Verbindungen zu den Spielern aufgerufen und started dann fuer die jeweiligen Spieler einen playerThread
 def resumeMenu(connection1,connection2):
     global menuRunning
     menuRunning = True
     threading.Thread(target=playerThread, args=(connection1,False,1)).start()
     threading.Thread(target=playerThread, args=(connection2,False,2)).start()
-    print("menu Running again")
 
 def main():
     pygame.init()
@@ -157,12 +148,14 @@ def main():
     # ServerThread starten
     threading.Thread(target=serverThread, args=()).start()
 
+    # Das Hintergrundbild einlesen und auf die Bildschirmgroeße anpassen
     backgroundImage = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","backGround.png"))
     resizedImage = pygame.transform.scale(backgroundImage, (WINDOWWIDTH, WINDOWHEIGHT))
     background = MENUSCREEN.blit(resizedImage, (0 , 0))
+
     while True:
-        while menuRunning:
-            time.sleep(0.1)            
+        time.sleep(0.1)
+        while menuRunning:      
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -175,9 +168,10 @@ def main():
                 pygame.quit()
                 sys.exit()
                 return
+            # Hier wird das Hintergrundbild dargestellt
             MENUSCREEN.blit(resizedImage, (0 , 0))
             pygame.display.update()
             FPSCLOCK.tick(FPS)
-    print("menu ende---------------------------------------")
+
 if __name__=='__main__':
     main()

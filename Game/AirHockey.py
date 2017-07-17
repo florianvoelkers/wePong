@@ -6,7 +6,6 @@ import random
 import socket
 import threading
 import os
-import Menu
 import time
 
 
@@ -32,20 +31,21 @@ DECREASESPEED = 0.04
 AIRSTART = False
 AIREND = False
 
+# Positionen der Schlaeger festlegen
 LEFTBATPOSITION = 500, WINDOWHEIGHT/2 -35
-RIGHTBATPOSITION =WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
+RIGHTBATPOSITION = WINDOWWIDTH-500 - 70, WINDOWHEIGHT/2 -35
 
+# Diese Methode setzt die Variable airRunning auf False dadurch wird die Game Schleife beendet und das Spiel angehalten
 def exitMethod():
     global airRunning
     airRunning = False
-    #pygame.quit()
-    #sys.exit()
 
 # Arena zeichnen
+# Durch das uebereinander legen von Kreisen und langen Rechtecken war es moeglich das Spielfeld zu erstellen
+# Wenn init = True ist dann werden die Raender und Tore zurueck gegeben
 def drawArena(init):
     AIRSCREEN.fill(BLUE)
     
-    # Rand oben und unten
     net = pygame.draw.rect(AIRSCREEN,RED,(WINDOWWIDTH/2-4, 0, 8, WINDOWHEIGHT))
     centerOuterCircle = pygame.draw.circle(AIRSCREEN, RED, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 100, 0)
     centerFillCircle = pygame.draw.circle(AIRSCREEN, BLUE, (int(WINDOWWIDTH/2),int(WINDOWHEIGHT/2)), 90, 0)
@@ -66,6 +66,8 @@ def drawArena(init):
     if init:
         return lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal
 
+# Mit dieser Methode wird uberprueft ob der Puck an einem Randstueck abprallen muss, ist das der Fall wird die Flugrichtung angepasst
+# Bei einer Kollision mit einem Tor wird der Score erhoet und der puck mit einer zufaelligen Flugrichtung in der Mitte des Spielfeldes platziert
 def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal, score1, score2):
 
     def resetPuck ():
@@ -96,6 +98,8 @@ def checkEdgeCollision(puck, puckDirY, puckDirX,lowerEdge, upperEdge, leftEdge, 
 
     return score1, score2, puck, puckDirY, puckDirX
 
+# Diese Methode ueberprueft Kollisionen zwischen dem mitgegbenen Schlager und dem Puck
+# Bei einer Kollision wird die neue Flugrichtung des Pucks berechnet und zurueck gegeben
 def checkBatCollision(puck, puckDirY, puckDirX, bat):
     global MAXSPEED
     newDirY,newDirX = 0,0
@@ -133,10 +137,12 @@ def checkBatCollision(puck, puckDirY, puckDirX, bat):
         newDirX = puckDirX
     return newDirY, newDirX
 
+# Der Puck wird mit dieser Methode gezeichnet
 def drawPuck(puck):
     newPuck = AIRSCREEN.blit(PUCKIMAGE, (puck.x,puck.y))
     return newPuck
 
+# Diese Methode wendet die Bewegungsrichtung auf den Puck an und gibt die neue Position zurueck
 def movePuck(puck, puckDirX, puckDirY):
     puck.x += puckDirX
     puck.y += puckDirY
@@ -152,6 +158,7 @@ def movePuck(puck, puckDirX, puckDirY):
 
     return puck ,newDirX, newDirY
 
+# Diese Methode zeichnet die Schlaeger des jeweils mitgegebenen Spielers und gibt ihn zurueck
 def drawBat(player1):
     if player1:
         bat = AIRSCREEN.blit(BATIMAGE, LEFTBATPOSITION)
@@ -159,6 +166,8 @@ def drawBat(player1):
         bat = AIRSCREEN.blit(BATIMAGE, RIGHTBATPOSITION)
     return bat
 
+# Diese Methode bekommt ueber einen boolean Wert gesagt ob Player 1 = True oder 2 = False gewonnen hat
+# Der jeweilige Gewinner wird dann in grosser Schrift in der mitte des Bildschirms angezeigt und nach der vorgegebenen Zeit wird die exitMethode aufgerufen
 def endResult(player):
     global AIREND
     global AIRSTART
@@ -182,7 +191,7 @@ def endResult(player):
     exitMethod()
     return
 
-# Anzeige des Spieler Scores
+# Anzeige des Spieler Scores an der jeweiligen Stelle fuer die verschiedenen Spieler
 def displayScore(player, score):
     if score > 2:
         endResult(player)
@@ -196,6 +205,10 @@ def displayScore(player, score):
     resultRect.topleft = (postion, 25)
     AIRSCREEN.blit(resultSurf, resultRect)
 
+
+# Die countdown Methode zeigt zu Beginn des Spiels einen Countdown auf der Mitte des Spielfeldes an
+# Am ende des Countdowns wird AIRSTART auf True gesetzt wodurch das Spiel gestartet wird
+# Die Methode drawArena wird auch immer wieder aufgerufen damit der Countdown sich nicht ueberschreibt
 def countdown():
     global AIRSTART
     start_ticks=pygame.time.get_ticks()
@@ -238,6 +251,7 @@ def playerThread(connection,playerSide):
         RIGHTPLAYERCONNECTED = True
         RIGHTPLAYERCONNECTION = playerConnection
 
+    # In dieser Schleife werden die gesendeten Daten der Spieler ausgelesen und in Globalen Variablen gespeichert
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
@@ -249,14 +263,15 @@ def playerThread(connection,playerSide):
                     LEFTBATPOSITION = newX * (WINDOWWIDTH/200),(WINDOWHEIGHT/100) * newY
                 else:
                     RIGHTBATPOSITION = newX * (WINDOWWIDTH/200) + WINDOWWIDTH/2  ,(WINDOWHEIGHT/100) * newY
+
+        # Wenn AIREND gesetzt wird bekommen die Player die Nachricht end damit die App wieder in das Hauptmenu geht          	         
         if AIREND:
-            print ("send end")
             playerConnection.send("end\n")
-            print ("end sended")
             break
     return
 
-
+# Dies ist die Main-Methode des Spiels die aus dem Menu aufgerufen wird
+# Es werden die Verbindungen zu den Spielern mitgegeben und ein callback um das Menu wieder zu starten
 def main(connection1,connection2,callMenu):
     pygame.init()
 
@@ -284,12 +299,9 @@ def main(connection1,connection2,callMenu):
     score1 = 0
     score2 = 0
 
-    # automatischer pfad auf dem Pi funktioniert unter windows nicht
     PUCKIMAGE = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","puck.png"))
     BATIMAGE = pygame.image.load(os.path.join("/home/pi/Desktop/Game/Sprites","SchlaegerRot.png"))
 
-    #PUCKIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","puck.png"))
-    #BATIMAGE = pygame.image.load(os.path.join("C:/Users/Niko/Documents/wePong/Game/Sprites","SchlaegerRot.png"))
     puckDiameter = PUCKIMAGE.get_height() / 2
     puck = AIRSCREEN.blit(PUCKIMAGE, (int(WINDOWWIDTH/2) - puckDiameter, int(WINDOWHEIGHT/2)-puckDiameter))
     bat1 = drawBat(True)
@@ -300,14 +312,17 @@ def main(connection1,connection2,callMenu):
     puckDirX = ramdomDir[0] * MAXSPEED/2  # -1 = links 1 = rechts
     puckDirY = ramdomDir[1] * MAXSPEED/2  # -1 = hoch 1 = runter
 
-    # get arena values
+    # Teile der Arena speichern
     lowerEdge, upperEdge, leftEdge, rightEdge, leftGoal, rightGoal = drawArena(True)
 
+    # starten der PlayerThreads
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()
 
+    # starten des Countdowns
     countdown()
 
+    # Haupschleife des Spiels
     while airRunning:
         
         for event in pygame.event.get():
@@ -338,6 +353,8 @@ def main(connection1,connection2,callMenu):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+    # Wenn die airRunning - Schleife unterbrochen wird, wird wieder das Menu aufgerufen und die Spielerverbindungen werden zurueck uebergeben
     callMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
     return
 

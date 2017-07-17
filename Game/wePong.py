@@ -5,7 +5,6 @@ from pygame.locals import *
 import random
 import socket
 import threading
-#import Menu
 import os
 import time
 
@@ -42,12 +41,10 @@ PONGSTART = False
 LEFTPLAYERCONNECTED = False
 RIGHTPLAYERCONNECTED = False
 
-
+# Diese Methode setzt die Variable pongRunning auf False dadurch wird die Game Schleife beendet und das Spiel angehalten
 def exitMethod():
     global pongRunning
     pongRunning = False
-    #pygame.quit()
-    #sys.exit()
 
 # Arena zeichnen
 def drawArena():
@@ -149,6 +146,8 @@ def checkPointScored(player,ball, score, ballDirX,ballDirY):
         # Wenn nichts passiert ist
         else: return (score,ball,ballDirX,ballDirY)
 
+# Diese Methode bekommt ueber einen boolean Wert gesagt ob Player 1 = True oder 2 = False gewonnen hat
+# Der jeweilige Gewinner wird dann in grosser Schrift in der mitte des Bildschirms angezeigt und nach der vorgegebenen Zeit wird die exitMethode aufgerufen
 def endResult(player):
     global PONGEND
     global PONGSTART
@@ -173,6 +172,9 @@ def endResult(player):
     exitMethod()
     return
 
+# Die countdown Methode zeigt zu Beginn des Spiels einen Countdown auf der Mitte des Spielfeldes an
+# Am ende des Countdowns wird PONGSTART auf True gesetzt wodurch das Spiel gestartet wird
+# Die Methode drawArena wird auch immer wieder aufgerufen damit der Countdown sich nicht ueberschreibt
 def countdown():
     global PONGSTART
     start_ticks=pygame.time.get_ticks()
@@ -230,7 +232,7 @@ def playerThread(connection,playerSide):
     else:
         RIGHTPLAYERCONNECTED = True
         RIGHTPLAYERCONNECTION = connection
-        
+    
     while True:
         data = playerConnection.recv(1024)
         if data.count(":") == 1:
@@ -241,10 +243,9 @@ def playerThread(connection,playerSide):
                     LEFTPADDLESPEED = int(newSpeed)
                 else:
                     RIGHTPADDLESPEED = int(newSpeed)
+        # Wenn PONGEND gesetzt wird bekommt die App ein "end" gesendet was sie in das Hauptmenu zurueck kehren laesst
         if PONGEND:
-            print ("send end")
             playerConnection.send("end\n")
-            print ("end sended")
             break
     return
 
@@ -257,8 +258,6 @@ def main(connection1,connection2,callMenu):
     global pongRunning
     global PONGEND
     global menuInstance
-
-    print ("main aufruf","-------------------------------")
 
     pongRunning = True
     # Einstellungen der Schriftart
@@ -305,19 +304,23 @@ def main(connection1,connection2,callMenu):
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS*3,PADDLESIZE)
     paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET , playerTwoPosition, LINETHICKNESS*3,PADDLESIZE)
 
+    # Erstellen des Balls
     ball = pygame.draw.circle(PONGSCREEN, WHITE, (int(ballX),int(ballY)), LINETHICKNESS*4)
     
+    # Erstes Zeichen der Arena, der Schlaeger und des Balls
     drawArena()
     drawPaddle(paddle1)
     drawPaddle(paddle2)
     drawBall(ballX,ballY)
     
+    # Starten der Playerthreads
     threading.Thread(target=playerThread, args=(connection1,True)).start()
     threading.Thread(target=playerThread, args=(connection2,False)).start()
     
+    # Starten des Countdowns
     countdown()
     
-    print (score1,score2,PONGEND,"-------------------------------")
+    # Haupschleife des Spiels
     while pongRunning:
         
         for event in pygame.event.get():
@@ -328,7 +331,6 @@ def main(connection1,connection2,callMenu):
         pressed = pygame.key.get_pressed()
         # Spiel beenden wenn Escape gedrueckt wird
         if pressed[pygame.K_ESCAPE]:
-            print ("escape")
             pygame.quit()
             sys.exit()
             
@@ -356,9 +358,9 @@ def main(connection1,connection2,callMenu):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-    print("wepong ende!")
+
+    # Wenn pongRunning auf False gesetzt wird beendet sich die Haupschleife und das Menu wird mit den Spielerverbindungen aufgerufen
     callMenu(LEFTPLAYERCONNECTION,RIGHTPLAYERCONNECTION)
-    print("nach call menu")
     return
 
 if __name__=='__main__':

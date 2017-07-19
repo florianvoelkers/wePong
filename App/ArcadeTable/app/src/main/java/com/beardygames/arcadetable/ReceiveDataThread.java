@@ -25,12 +25,9 @@ public class ReceiveDataThread implements Runnable {
         while(!data.equals("end"))
             try {
                 Scanner input = new Scanner(new InputStreamReader(socket.getInputStream()));
-                System.out.println("warte auf input");
                 data = input.next();
-                System.out.println("input  da: " + data);
                 if (data.equals("end")){
                     DataHandler.setGameRunning(false);
-                    //input.close();
                     return;
                 }
             } catch (IOException e) {

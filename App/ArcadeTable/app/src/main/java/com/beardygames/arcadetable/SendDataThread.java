@@ -28,6 +28,7 @@ public class SendDataThread extends Thread {
     @Override
     public void run() {
         while(DataHandler.getGameRunning()){
+            // onCommand determines whether or not sending data is a one time action
             if (onCommand){
                 if (dataSet){
                     try {
@@ -36,8 +37,18 @@ public class SendDataThread extends Thread {
                                 true);
                         out.print(data);
                         out.flush();
-                        data = "";
-                        dataSet = false;
+                        if (DataHandler.getIsTron()) {
+                            data = "direction:none";
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            data = "";
+                            dataSet = false;
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
